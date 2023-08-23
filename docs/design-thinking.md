@@ -2,7 +2,7 @@
 
 HAnim是基于 **动画执行器(HEngine)**, **动画行为(HAnimate)**, **动画对象(HObject)** 三者"分离"的思想进行架构和设计的
 
-在HAnim的视角中, 一个动画被划分为**动画行为(HAnimate)**, **动画对象(HObject)** , 通过**动画执行器(HEngine)**把一个**动画行为(HAnimate)**作用到一个**动画对象(HObject)**并进行"播放", 就形成了一个完整的动画
+在HAnim的视角中, 一个动画被划分为**动画行为(HAnimate)**, **动画对象(HObject)** , 通过 **动画执行器(HEngine)** 把一个 **动画行为(HAnimate)** 作用到一个 **动画对象(HObject)** 并进行"播放", 就形成了一个完整的动画
 
 即一个动画可以描述为如下形式:
 
@@ -10,7 +10,7 @@ HAnim是基于 **动画执行器(HEngine)**, **动画行为(HAnimate)**, **动�
 
 其中 HAnimate, HObject 为独立变量
 
-通过HAnim动画框架让**动画行为(HAnimate)** 和 **动画对象(HObject)**的设计与开发进行了解耦, 增加更多的复用可能性
+通过HAnim动画框架让 **动画行为(HAnimate)** 和 **动画对象(HObject)** 的设计与开发进行了解耦, 增加更多的复用可能性
 
 
 

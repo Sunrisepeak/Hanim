@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Other
+examples/.xmake
+examples/build
+examples/*/.xmake
+examples/*/build
+.vscode
