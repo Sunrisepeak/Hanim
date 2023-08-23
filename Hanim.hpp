@@ -746,7 +746,7 @@ private:
             HObject *obj;
         };
     public:
-        __Dida(unsigned int microSec) : __mExit { false }, _mTriggerInterval { microSec }, __mUpdateMutex{}, __mAOVec{} {
+        __Dida(unsigned int microSec) : __mExit { false }, __mTriggerInterval { microSec }, __mUpdateMutex{}, __mAOVec{} {
             __mAnimDriverThread = std::move(std::thread(
                 [&] {
                     while (!(this->__mExit)) {
@@ -758,6 +758,7 @@ private:
                                     if (__mAOVec[i].anim->status() == HAnimate::Status::Finished) {
                                         __mAOVec[i].anim->__mAutoPlayFlag = __mAOVec[i].obj->__mAutoPlayFlag = 0;
                                         __mAOVec.erase(__mAOVec.begin() + i);
+                                        continue;
                                     } else {
                                         PlayFrame(*(__mAOVec[i].anim), *(__mAOVec[i].obj));
                                     }
@@ -770,7 +771,7 @@ private:
                             }
                         }
                         // TODO: optimize by time compute
-                        std::this_thread::sleep_for(std::chrono::microseconds(_mTriggerInterval));
+                        std::this_thread::sleep_for(std::chrono::microseconds(__mTriggerInterval));
                     }
                 }
             ));
@@ -784,7 +785,7 @@ private:
 
     public:
         void setInterval(unsigned int microSec) {
-            _mTriggerInterval = microSec;
+            __mTriggerInterval = microSec;
         }
 
         void aopRegister(AOPair &&aop) {
@@ -811,14 +812,14 @@ private:
 
     private:
         bool __mExit;
-        int _mTriggerInterval; // micro-sec
+        int __mTriggerInterval; // micro-sec
         std::mutex __mUpdateMutex;
         std::thread __mAnimDriverThread;
         std::vector<AOPair> __mAOVec; // TODO: use dlist
     };
 private:
     unsigned int __mFrameRate;
-    __Dida __mDida; // Anim Ticker/Timer
+    __Dida __mDida; // Anim Driver/Ticker/Timer
 
     HEngine() : __mFrameRate { 60 }, __mDida { (1000 * 1000) /__mFrameRate } { }
     HEngine(const HEngine&) = delete;
