@@ -18,9 +18,9 @@
 #define HOBJECT_OPENGL
 #include <HanimObject.hpp>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+#ifdef HANIM_ENABLE_XRECORDER_OPENGL
+#include <OpenGLRecorder.hpp>
+#endif
 
 int main() {
     if (!glfwInit()) {
@@ -34,7 +34,6 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     /*
       (0,0) set gl-matrix
@@ -73,11 +72,18 @@ int main() {
 
         hanim::HEngine::PlayFrame(bAnim, button);
 
-        glFlush();
+    #ifdef HANIM_ENABLE_XRECORDER_OPENGL
+        static xrecorder::OpenGLRecorder<1920,1080> xr("hanim-demo-opengl");
+        xr.captureFrameData();
+        xr.saveToVideo();
+        //xr.saveToImg();
+    #endif
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;

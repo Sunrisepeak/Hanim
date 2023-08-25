@@ -20,10 +20,13 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-
 // Hanim
 #include <Hanim.hpp>
 #include <himgui.hpp>
+
+#ifdef HANIM_ENABLE_XRECORDER_OPENGL
+#include <OpenGLRecorder.hpp>
+#endif
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -93,6 +96,13 @@ int main() {
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    #ifdef HANIM_ENABLE_XRECORDER_OPENGL
+        static xrecorder::OpenGLRecorder<1920,1080> xr("hanim-demo-imgui");
+        xr.captureFrameData();
+        xr.saveToVideo();
+        //xr.saveToImg();
+    #endif
 
         glfwSwapBuffers(window);
     }

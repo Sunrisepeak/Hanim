@@ -553,12 +553,12 @@ protected:
         switch (type) {
             case InterpolationAnim::SCALE:
                 // TODO: multi-modify x, y, w, h support
-                static float _x = __mX + __mW / 2, _y = __mY + __mH / 2;
-                static float _w = __mW, _h = __mH;
-                __mW = _w * frame.data[0];
-                __mH = _h * frame.data[0];
-                __mX = _x - __mW / 2;
-                __mY = _y - __mH / 2;
+                static float _xS = __mX + __mW / 2, _yS = __mY + __mH / 2;
+                static float _wS = __mW, _hS = __mH;
+                __mW = _wS * frame.data[0];
+                __mH = _hS * frame.data[0];
+                __mX = _xS - __mW / 2;
+                __mY = _yS - __mH / 2;
                 break;
             case InterpolationAnim::SCALE_2:
                 __mW = frame.data[0];
@@ -576,6 +576,10 @@ protected:
                 break;
             case InterpolationAnim::ALPHA:
                 __mA = frame.data[0] / 255.f;
+            case InterpolationAnim::Rotation:
+                static float _xR = __mX, _yR = __mY;
+                __mX = _xR, __mY = _yR;
+                frame.rotation(__mX, __mY);
             default:
                 break;
         }

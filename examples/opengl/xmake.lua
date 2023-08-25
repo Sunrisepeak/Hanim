@@ -4,6 +4,7 @@ set_languages("c++17")
 
 add_includedirs("../../")
 
+-- link lib
 if is_plat("windows") then
     add_links("opengl32")
 elseif is_plat("linux") then

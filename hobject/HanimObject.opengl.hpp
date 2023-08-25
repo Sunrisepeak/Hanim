@@ -40,6 +40,8 @@ protected: // interface impl
         glVertex2f(_mX, _mY + _mH);
 
         glEnd();
+
+        glFlush();
     }
 };
 
