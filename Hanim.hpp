@@ -181,6 +181,7 @@ struct IAFrame {
     std::vector<float> data;
     IAFrame(std::vector<float> vec) : data { vec } { }
     IAFrame(float x = 0) : data { x } { }
+    IAFrame(std::initializer_list<float> &&ilist) : IAFrame{std::vector<float>(ilist.begin(), ilist.end())} { }
 
     void rotation(float &x, float &y) const {
         // data [refSysX, refSysY, rotationAngle1/degree]
@@ -570,12 +571,12 @@ protected:
                 __mY = frame.data[1];
                 break;
             case InterpolationAnim::GRADIENT:
-                __mR = frame.data[0] / 255.f;
-                __mG = frame.data[1] / 255.f;
-                __mB = frame.data[2] / 255.f;
+                __mR = frame.data[0];
+                __mG = frame.data[1];
+                __mB = frame.data[2];
                 break;
             case InterpolationAnim::ALPHA:
-                __mA = frame.data[0] / 255.f;
+                __mA = frame.data[0];
             case InterpolationAnim::Rotation:
                 static float _xR = __mX, _yR = __mY;
                 __mX = _xR, __mY = _yR;
@@ -628,6 +629,15 @@ public: // setter / getter
         _mG = G;
         _mB = B;
     }
+
+    void getAlpha(float &alpha) const {
+        alpha = _mA;
+    }
+
+    void setAlpha(float alpha) {
+        _mA = alpha;
+    }
+    
 protected:
     Proprety _mX, _mY;
     Proprety _mW, _mH;
@@ -662,6 +672,14 @@ public: // base-play
     static void Play(HAnimate &anim, HObject &hObj) {
         anim.start();
         _register(&anim, &hObj);
+    }
+
+    static void PlayFrame(HObject &hObj, std::function<HAnimate & ()> animAction = nullptr) {
+        if (animAction) {
+            PlayFrame(animAction(), hObj);
+        } else {
+            hObj._render();
+        }
     }
 
     static void PlayFrame(HAnimate &anim, HObject &&hObj) { PlayFrame(anim, hObj); }

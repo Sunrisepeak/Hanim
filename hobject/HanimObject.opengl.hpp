@@ -24,13 +24,16 @@ public:
     Button() : HObjectTemplate() {
         _mX = _mY = 0;
         _mW = _mH = 85;
-        _mR = _mG = _mB = 192;
+        _mR = 153;
+        _mG = _mB = 255;
+        _mA = 255;
     }
 
 protected: // interface impl
     void _render() override {
 
-        glColor3f(_mR, _mG, _mB);
+        glColor4f(_mR / 255, _mG / 255, _mB / 255, _mA / 255);
+        //glColor3ui((int)_mR, (int)_mG, (int)_mB);
 
         glBegin(GL_QUADS);
 

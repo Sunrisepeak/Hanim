@@ -8,7 +8,7 @@ end
 
 add_links("opencv_core")
 add_links("opencv_highgui")
-add_links("opencv_imgproc", "opencv_videoio")
+add_links("opencv_imgproc", "opencv_videoio", "opencv_imgcodecs")
 add_links("glfw")
 
 add_defines("HANIM_ENABLE_XRECORDER_OPENGL")

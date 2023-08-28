@@ -44,9 +44,9 @@ protected: // interface impl
 
         bool colorConfig = (_mR >= 0 && _mG >= 0 && _mR >= 0);
         if (colorConfig) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(_mR, _mG, _mB, 0.3));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(_mR, _mG, _mB, 0.6));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(_mR, _mG, _mB, 0.9));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(_mR / 255, _mG / 255, _mB / 255, 0.3));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(_mR / 255, _mG / 255, _mB / 255, 0.6));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(_mR / 255, _mG / 255, _mB / 255, 0.9));
         }
 
         if (_mW > 0 && _mH > 0) ImGui::Button(__mName.c_str(), {_mW, _mH});
