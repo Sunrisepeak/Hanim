@@ -41,13 +41,13 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // anim demo
-        //if (hanim::demo::move() /* finished */) break;
-        //if (hanim::demo::scale() /* finished */) break;
-        //if (hanim::demo::alpha() /* finished */) break;
-        //if (hanim::demo::gradient() /* finished */) break;
-        //if (hanim::demo::path() /* finished */) break;
-        //if (hanim::demo::pathKF() /* finished */) break;
-        if (hanim::demo::rotation() /* finished */) break;
+        //if (hanim::demo::move() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::scale() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::alpha() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::gradient() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::path() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::pathKF() == hanim::HAnimate::Status::Finished) break;
+        if (hanim::demo::rotation() == hanim::HAnimate::Status::Finished) break;
 
 
         xr.captureFrameData();

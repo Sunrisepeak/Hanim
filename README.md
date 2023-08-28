@@ -45,11 +45,11 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
       </td>
       <td>
         <pre><code>
-static bool move() {
+static hanim::HAnimate::Status move() {
     static auto move = hanim::move(50, 200, 350, 200, 30);
     static auto hobj = hanim::object::opengl::Button();
     hanim::HEngine::PlayFrame(move, hobj);
-    return move.status() == hanim::HAnimate::Status::Finished;
+    return move.status();
 }
         </code></pre>
       </td>
@@ -61,11 +61,11 @@ static bool move() {
       </td>
       <td>
         <pre><code>
-static bool scale() {
+static hanim::HAnimate::Status scale() {
     static auto scale = hanim::scale(100, 100, 450, 450, 30);
     static auto hobj = hanim::object::opengl::Button();
     hanim::HEngine::PlayFrame(scale, hobj);
-    return scale.status() == hanim::HAnimate::Status::Finished;
+    return scale.status();
 }
         </code></pre>
       </td>
@@ -77,17 +77,17 @@ static bool scale() {
       </td>
       <td>
         <pre><code>
-static bool alpha() {
+static hanim::HAnimate::Status alpha() {
     static auto alpha = hanim::alpha(0, 255, 30);
     static auto hobj = hanim::object::opengl::Button();
-    static bool init = true;
+    static hanim::HAnimate::Status init = true;
     if (init) {
         hobj.setPos(100, 100);
         hobj.setSize(300, 300);
         init = false;
     }
     hanim::HEngine::PlayFrame(alpha, hobj);
-    return alpha.status() == hanim::HAnimate::Status::Finished;
+    return alpha.status();
 }
         </code></pre>
       </td>
@@ -99,17 +99,17 @@ static bool alpha() {
       </td>
       <td>
         <pre><code>
-static bool gradient() {
+static hanim::HAnimate::Status gradient() {
     static auto gradient = hanim::gradient(255, 0, 0, 0, 0, 255, 30);
     static auto hobj = hanim::object::opengl::Button();
-    static bool init = true;
+    static hanim::HAnimate::Status init = true;
     if (init) {
         hobj.setPos(100, 100);
         hobj.setSize(300, 300);
         init = false;
     }
     hanim::HEngine::PlayFrame(gradient, hobj);
-    return gradient.status() == hanim::HAnimate::Status::Finished;
+    return gradient.status();
 }
         </code></pre>
       </td>
@@ -121,11 +121,11 @@ static bool gradient() {
       </td>
       <td>
         <pre><code>
-static bool rotation() {
+static hanim::HAnimate::Status rotation() {
     static auto rotation = hanim::rotation(250, 250, 0, 360, 30);
     static auto hobj1 = hanim::object::opengl::Button();
     static auto hobj2 = hanim::object::opengl::Button();
-    static bool init = true;
+    static hanim::HAnimate::Status init = true;
     if (init) {
         hobj1.setPos(100, 100);
         hobj1.setSize(300, 300);
@@ -137,7 +137,7 @@ static bool rotation() {
     }
     hanim::HEngine::PlayFrame(hobj1); // only render
     hanim::HEngine::PlayFrame(rotation, hobj2);
-    return rotation.status() == hanim::HAnimate::Status::Finished;
+    return rotation.status();
 }
         </code></pre>
       </td>
@@ -149,7 +149,7 @@ static bool rotation() {
       </td>
       <td>
         <pre><code>
-static bool path() {
+static hanim::HAnimate::Status path() {
     static auto path = hanim::path<hanim::InterpolationAnim::Var::X>(
         0, 360, // x from 0 to 360
         [](float x) {
@@ -160,7 +160,7 @@ static bool path() {
     );
     static auto hobj = hanim::object::opengl::Button();
     hanim::HEngine::PlayFrame(path, hobj);
-    return path.status() == hanim::HAnimate::Status::Finished;
+    return path.status();
 }
         </code></pre>
       </td>
@@ -172,7 +172,7 @@ static bool path() {
       </td>
       <td>
         <pre><code>
-static bool pathKF() {
+static hanim::HAnimate::Status pathKF() {
     static auto path = hanim::path(
         { // path key-frame
             {0, 0},
@@ -185,7 +185,7 @@ static bool pathKF() {
     );
     static auto hobj = hanim::object::opengl::Button();
     hanim::HEngine::PlayFrame(path, hobj);
-    return path.status() == hanim::HAnimate::Status::Finished;
+    return path.status();
 }
         </code></pre>
       </td>
