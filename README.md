@@ -55,7 +55,7 @@ static hanim::HAnimate::Status move() {
       </td>
     </tr>
     <tr>
-      <td>缩放/Scale</td>
+      <td>缩放</td>
       <td>
         <img src="docs/imgs/hanim-demo.scale.gif" width="200">
       </td>
