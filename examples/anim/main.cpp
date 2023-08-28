@@ -7,6 +7,8 @@
 // ProjectLinks: https://github.com/Sunrisepeak/HAnim
 //
 
+// ffmpeg -i hanim-demo.xx.mkv -s 200x200 hanim-demo.xx.gif
+
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 
@@ -35,7 +37,7 @@ int main() {
     glEnable( GL_BLEND );
 
 
-    static xrecorder::OpenGLRecorder<500, 500, 30> xr("hanim-demo.mp4", true);
+    static xrecorder::OpenGLRecorder<500, 500, 30> xr("hanim-demo");
 
     while (true) {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -47,7 +49,12 @@ int main() {
         //if (hanim::demo::gradient() == hanim::HAnimate::Status::Finished) break;
         //if (hanim::demo::path() == hanim::HAnimate::Status::Finished) break;
         //if (hanim::demo::pathKF() == hanim::HAnimate::Status::Finished) break;
-        if (hanim::demo::rotation() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::rotation() == hanim::HAnimate::Status::Finished) break;
+
+        // compose anim
+        //if (hanim::demo::fadeIn() == hanim::HAnimate::Status::Finished) break;
+        //if (hanim::demo::fadeOut() == hanim::HAnimate::Status::Finished) break;
+        if (hanim::demo::focus() == hanim::HAnimate::Status::Finished) break;
 
 
         xr.captureFrameData();
