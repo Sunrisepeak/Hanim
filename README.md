@@ -29,7 +29,6 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
 
 > 基础的动画效果及代码实现
 
-<h1></h1>
 <table>
   <thead>
     <tr>
@@ -55,7 +54,6 @@ static bool move() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>缩放/Scale</td>
       <td>
@@ -72,7 +70,6 @@ static bool scale() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>透明度/Alpha</td>
       <td>
@@ -95,7 +92,6 @@ static bool alpha() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>渐变/gradient</td>
       <td>
@@ -118,7 +114,6 @@ static bool gradient() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>旋转/rotation</td>
       <td>
@@ -147,7 +142,6 @@ static bool rotation() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>路径/path</td>
       <td>
@@ -171,7 +165,6 @@ static bool path() {
         </code></pre>
       </td>
     </tr>
-    <br>
     <tr>
       <td>关键帧路径/pathkf</td>
       <td>
