@@ -55,7 +55,7 @@ static hanim::HAnimate::Status move() {
       </td>
     </tr>
     <tr>
-      <td>缩放/Scale</td>
+      <td>缩放</td>
       <td>
         <img src="docs/imgs/hanim-demo.scale.gif" width="200">
       </td>
@@ -194,7 +194,101 @@ static hanim::HAnimate::Status pathKF() {
 </table>
 
 
+### 组合动画
 
+<table align = "center">
+  <thead>
+    <tr>
+      <th>动画</th>
+      <th>效果</th>
+      <th>"动画"实现</th>
+    </tr>
+  </thead>
+  <body>
+    <tr>
+      <td>淡入</td>
+      <td>
+        <img src="docs/imgs/hanim-demo.fadein.gif" width="200">
+      </td>
+      <td>
+        <pre><code>
+struct FadeIn : public ComposeAnim {
+    FadeIn(
+        int x, int y,
+        int frameNumbers = 60,
+        std::function<HAnimate&& ()> pathAnimGenFunc = nullptr
+    ) {
+        if (pathAnimGenFunc) {
+            addAnim(pathAnimGenFunc());
+        } else {
+            ComposeAnim::move(0, y, x, y)
+                .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
+                .setFrameNums(frameNumbers);
+        }
+        ComposeAnim::alpha(0, 255)
+            .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
+            .setFrameNums(frameNumbers);
+        setFrameNums(frameNumbers);
+    }
+};
+        </code></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>淡出</td>
+      <td>
+        <img src="docs/imgs/hanim-demo.fadeout.gif" width="200">
+      </td>
+      <td>
+        <pre><code>
+struct FadeOut : public ComposeAnim {
+    FadeOut(
+        int x, int y,
+        int frameNumbers = 60,
+        std::function<HAnimate&& ()> pathAnimGenFunc = nullptr
+    ) {
+        if (pathAnimGenFunc) {
+            addAnim(pathAnimGenFunc());
+        } else {
+            ComposeAnim::move(x, y, x * 2, y)
+                .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
+                .setFrameNums(frameNumbers);
+        }
+        ComposeAnim::alpha(255, 0)
+            .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
+            .setFrameNums(frameNumbers);
+        setFrameNums(frameNumbers);
+    }
+};
+        </code></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>焦点</td>
+      <td>
+        <img src="docs/imgs/hanim-demo.focus.gif" width="200">
+      </td>
+      <td>
+        <pre><code>
+class Focus : public ComposeAnim {
+public:
+    Focus(int frameNumbers = 60) {
+        ComposeAnim::scale(1, 1.1)
+            .setEasingCurve(hanim::EasingCurve::OUT_ELASTIC)
+            .setFrameNums(frameNumbers);
+        ComposeAnim::alpha(200, 255)
+            .setEasingCurve(hanim::EasingCurve::ECType::IN_SIN)
+            .setFrameNums(frameNumbers);
+        this->setFrameNums(frameNumbers);
+    }
+};
+        </code></pre>
+      </td>
+    </tr>
+  </body>
+</table>
+
+**注:** 更多Demo及细节, 可参考examples目录对应实现
 
 ## 使用方法
 

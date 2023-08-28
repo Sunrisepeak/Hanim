@@ -129,6 +129,43 @@ static hanim::HAnimate::Status pathKF() {
     return path.status();
 }
 
+/* compose anim */
+
+static hanim::HAnimate::Status fadeIn() {
+    static auto fadeIn = hanim::animate::FadeIn(300, 200, 60);
+    static auto hobj = hanim::object::opengl::Button();
+
+    hanim::HEngine::PlayFrame(fadeIn, hobj);
+
+    return fadeIn.status();
+}
+
+static hanim::HAnimate::Status fadeOut() {
+    static auto fadeOut = hanim::animate::FadeOut(200, 200, 60);
+    static auto hobj = hanim::object::opengl::Button();
+
+    hanim::HEngine::PlayFrame(fadeOut, hobj);
+
+    return fadeOut.status();
+}
+
+static hanim::HAnimate::Status focus() {
+    static auto focus = hanim::animate::Focus(30);
+    static auto hobj = hanim::object::opengl::Button();
+    static bool init = true;
+
+    if (init) {
+        hobj.setPos(150, 150);
+        hobj.setSize(200, 200);
+        hobj.setAlpha(100);
+        init = false;
+    }
+
+    hanim::HEngine::PlayFrame(focus, hobj);
+
+    return focus.status();
+}
+
 }
 }
 

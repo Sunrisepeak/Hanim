@@ -1,0 +1,15 @@
+{
+    errdata = "In file included from \27[01m\27[K./anim-demo.hpp:16\27[m\27[K,\
+                 from \27[01m\27[Kmain.cpp:13\27[m\27[K:\
+\27[01m\27[K../../Hanim.hpp:\27[m\27[K In member function ‘\27[01m\27[Kvirtual hanim::Frame hanim::HAnimate::_nextFrame(float)\27[m\27[K’:\
+\27[01m\27[K../../Hanim.hpp:315:46:\27[m\27[K \27[01;35m\27[Kwarning: \27[m\27[Kno return statement in function returning non-void [\27[01;35m\27[K-Wreturn-type\27[m\27[K]\
+  315 |     virtual Frame _nextFrame(float fIndex) { \27[01;35m\27[K}\27[m\27[K // TODO: balance Anim and Anim Node\
+      |                                              \27[01;35m\27[K^\27[m\27[K\
+In file included from \27[01m\27[K./anim-demo.hpp:16\27[m\27[K,\
+                 from \27[01m\27[Kmain.cpp:13\27[m\27[K:\
+\27[01m\27[K../../Hanim.hpp:\27[m\27[K In constructor ‘\27[01m\27[Khanim::HEngine::__Dida::__Dida(unsigned int)\27[m\27[K’:\
+\27[01m\27[K../../Hanim.hpp:771:81:\27[m\27[K \27[01;35m\27[Kwarning: \27[m\27[Knarrowing conversion of ‘\27[01m\27[KmicroSec\27[m\27[K’ from ‘\27[01m\27[Kunsigned int\27[m\27[K’ to ‘\27[01m\27[Kint\27[m\27[K’ [\27[01;35m\27[K-Wnarrowing\27[m\27[K]\
+  771 |         __Dida(unsigned int microSec) : __mExit { false }, __mTriggerInterval { \27[01;35m\27[KmicroSec\27[m\27[K }, __mUpdateMutex{}, __mAOVec{} {\
+      |                                                                                 \27[01;35m\27[K^~~~~~~~\27[m\27[K\
+"
+}

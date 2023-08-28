@@ -1,0 +1,5 @@
+{
+    cmdlines = {
+        "xmake lua /home/speak/.local/share/xmake/actions/build/statistics.lua"
+    }
+}

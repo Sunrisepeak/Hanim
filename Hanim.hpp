@@ -75,14 +75,18 @@ public:
         IN_QUAD     = 2,
         OUT_QUAD    = 3,
         IN_OUT_QUAD = 4,
+        // CUBIC
+        IN_CUBIC     = 5,
+        OUT_CUBIC    = 6,
+        IN_OUT_CUBIC = 7,
         // sin
-        IN_SIN      = 5,
-        OUT_SIN     = 6,
-        IN_OUT_SIN  = 7,
+        IN_SIN      = 20,
+        OUT_SIN     = 21,
+        IN_OUT_SIN  = 22,
         // elastic
-        IN_ELASTIC      = 8,
-        OUT_ELASTIC     = 9,
-        IN_OUT_ELASTIC  = 10,
+        IN_ELASTIC      = 40,
+        OUT_ELASTIC     = 41,
+        IN_OUT_ELASTIC  = 42,
     };
 
 public:
@@ -97,6 +101,10 @@ public:
             case ECType::IN_QUAD: return InQuad(val / base) * base;
             case ECType::OUT_QUAD: return OutQuad(val / base) * base;
             case ECType::IN_OUT_QUAD: return InOutQuad(val / base) * base;
+            // cubic
+            case ECType::IN_CUBIC: return InCubic(val / base) * base;
+            case ECType::OUT_CUBIC: return OutCubic(val / base) * base;
+            case ECType::IN_OUT_CUBIC: return InOutCubic(val / base) * base;
             // sin
             case ECType::IN_SIN: return InSin(val / base) * base;
             case ECType::OUT_SIN: return OutSin(val / base) * base;
@@ -125,6 +133,23 @@ protected:
             return 0.5 * InQuad(x * 2);
         } else {
             return (0.5 * OutQuad(x * 2 - 1) + 0.5);
+        }
+    }
+
+    // Cubic
+    float InCubic(float x) {
+        return x * x * x;
+    }
+
+    float OutCubic(float x) {
+        return 1.0 - pow(1.0 - x, 3);
+    }
+
+    float InOutCubic(float x) {
+        if (x < 0.5) {
+            return 0.5 * InCubic(2.0 * x);
+        } else {
+            return 0.5 * OutCubic(2.0 * x - 1.0) + 0.5;
         }
     }
 
@@ -577,10 +602,12 @@ protected:
                 break;
             case InterpolationAnim::ALPHA:
                 __mA = frame.data[0];
+                break;
             case InterpolationAnim::Rotation:
                 static float _xR = __mX, _yR = __mY;
                 __mX = _xR, __mY = _yR;
                 frame.rotation(__mX, __mY);
+                break;
             default:
                 break;
         }
@@ -667,7 +694,7 @@ public: // spec-play
         }
     }
 
-public: // base-play
+public: // base-play interface for user
 
     static void Play(HAnimate &anim, HObject &hObj) {
         anim.start();
@@ -684,65 +711,7 @@ public: // base-play
 
     static void PlayFrame(HAnimate &anim, HObject &&hObj) { PlayFrame(anim, hObj); }
     static void PlayFrame(HAnimate &anim, HObject &hObj) {
-        float frameIndex = 0;
-        int subType =  anim._mSubType;
-
-        if (anim.__mStatus == HAnimate::Status::Running) {
-            if (anim.__mCurrentFrames == 0) {
-                anim.__mPlayDirect = 1;
-                __Instance().__statusSync(anim);
-            } else if (anim.__mCurrentFrames == anim._mFrameNums + 1) {
-                anim.__mCurrentFrames--;
-                if (anim.__mPlayDirect == 1)
-                    subType = -1; // anim  end
-            }
-
-            frameIndex = anim.__mEasingCurve(anim.__mCurrentFrames, anim._mFrameNums);
-
-            auto frame = anim.__mType == HAnimate::AType::ATREE ? Frame() : anim._nextFrame(frameIndex);
-
-            switch (anim.__mType) {
-                case HAnimate::AType::IANIM:
-                    hObj._interpolationHAnimate(subType, std::get<IAFrame>(frame));
-                    break;
-                case HAnimate::AType::FANIM:
-                    hObj._frameHAnimate(subType, std::get<FAFrame>(frame));
-                    break;
-                case HAnimate::AType::ATREE:
-                    for (int i = 0; i < anim.__mAnimVec.size(); i++) {
-                        if (anim.__mCurrentFrames >= anim.__mFrameTrackVec[i]) {
-                            if (
-                                anim.__mAnimVec[i]->__mPlayType == HAnimate::PlayType::OneShot &&
-                                anim.__mFrameTrackVec[i] + anim.__mAnimVec[i]->_mFrameNums < anim.__mCurrentFrames
-                            ) continue;
-        
-                            PlayFrame(*(anim.__mAnimVec[i]), hObj);
-                        }
-                    }
-                default: break;
-            }
-
-            if (subType == -1) { // anim end
-                if (anim.__mPlayType == HAnimate::PlayType::RT) {
-                    anim.__mPlayDirect = -1;
-                    __Instance().__statusSync(anim);
-                } else if (anim.__mPlayType == HAnimate::PlayType::Repeat) {
-                    anim.start(true);
-                    //TODO: __mCurrentFrames = -1 (0-frame play issue)
-                } else if (anim.__mPlayType == HAnimate::PlayType::OneShot) {
-                    anim.__mStatus = HAnimate::Status::Finished;
-                    //end when anim.__mCurrentFrames = anim.__mFramesNUmbers + 1
-                }
-            }
-
-            anim.__mCurrentFrames += anim.__mPlayDirect;
-
-        }
-
-        hObj._syncData(); // sync anim data
-
-        hObj._render(); // render anim data
-
+        __Instance().__PlayFrame(anim, hObj, true);
     }
 
 public: // TODO: optimize reg/unreg from one frame to one anim-frame
@@ -863,6 +832,69 @@ private:
                 __statusSync(*nodePtr);
             }
         }
+    }
+
+    void __PlayFrame(HAnimate &anim, HObject &hObj, bool render = true) {
+        float frameIndex = 0;
+        int subType =  anim._mSubType;
+
+        if (anim.__mStatus == HAnimate::Status::Running) {
+            if (anim.__mCurrentFrames == 0) {
+                anim.__mPlayDirect = 1;
+                __Instance().__statusSync(anim);
+            } else if (anim.__mCurrentFrames == anim._mFrameNums + 1) {
+                anim.__mCurrentFrames--;
+                if (anim.__mPlayDirect == 1)
+                    subType = -1; // anim  end
+            }
+
+            frameIndex = anim.__mEasingCurve(anim.__mCurrentFrames, anim._mFrameNums);
+
+            auto frame = anim.__mType == HAnimate::AType::ATREE ? Frame() : anim._nextFrame(frameIndex);
+
+            switch (anim.__mType) {
+                case HAnimate::AType::IANIM:
+                    hObj._interpolationHAnimate(subType, std::get<IAFrame>(frame));
+                    break;
+                case HAnimate::AType::FANIM:
+                    hObj._frameHAnimate(subType, std::get<FAFrame>(frame));
+                    break;
+                case HAnimate::AType::ATREE:
+                    for (int i = 0; i < anim.__mAnimVec.size(); i++) {
+                        if (anim.__mCurrentFrames >= anim.__mFrameTrackVec[i]) {
+                            if (
+                                anim.__mAnimVec[i]->__mPlayType == HAnimate::PlayType::OneShot &&
+                                anim.__mFrameTrackVec[i] + anim.__mAnimVec[i]->_mFrameNums < anim.__mCurrentFrames
+                            ) continue;
+
+                            __PlayFrame(*(anim.__mAnimVec[i]), hObj, false);
+                        }
+                    }
+                default: break;
+            }
+
+            if (subType == -1) { // anim end
+                if (anim.__mPlayType == HAnimate::PlayType::RT) {
+                    anim.__mPlayDirect = -1;
+                    __Instance().__statusSync(anim);
+                } else if (anim.__mPlayType == HAnimate::PlayType::Repeat) {
+                    anim.start(true);
+                    //TODO: __mCurrentFrames = -1 (0-frame play issue)
+                } else if (anim.__mPlayType == HAnimate::PlayType::OneShot) {
+                    anim.__mStatus = HAnimate::Status::Finished;
+                    //end when anim.__mCurrentFrames = anim.__mFramesNUmbers + 1
+                }
+            }
+
+            anim.__mCurrentFrames += anim.__mPlayDirect;
+
+        }
+
+        hObj._syncData(); // sync anim data
+
+        if (render)
+            hObj._render(); // render anim data
+
     }
 };
 

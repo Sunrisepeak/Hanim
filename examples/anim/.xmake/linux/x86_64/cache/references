@@ -1,0 +1,9 @@
+{
+    packages = {
+        "/home/speak/.xmake/packages/u/util-macros/1.19.3/d17c933f87f247f4915d3d4b16d5975a",
+        "/home/speak/.xmake/packages/c/ca-certificates/20230306/2e8142d6c30f4fd9a7225c59dc5c0132",
+        "/home/speak/.xmake/packages/p/python/3.10.6/e357df3d007a461995be04740991afd2",
+        "/home/speak/.xmake/packages/x/xcb-proto/1.14.1/47c387a4e1de43fcac017b2e60f17f14",
+        "/home/speak/.xmake/packages/i/imgui/v1.89.3/c7a8c9fe15444a73bbe179696345590b"
+    }
+}

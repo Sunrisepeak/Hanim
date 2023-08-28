@@ -1,0 +1,10 @@
+{
+    options = { },
+    mtimes = {
+        ["xmake.lua"] = 1693213236,
+        ["qt/xmake.lua"] = 1693213249,
+        ["opengl/xmake.lua"] = 1693213258,
+        ["imgui/xmake.lua"] = 1693213268
+    },
+    recheck = false
+}
