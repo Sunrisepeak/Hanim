@@ -29,7 +29,7 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
 
 > 基础的动画效果及代码实现
 
-<table>
+<table align = "center">
   <thead>
     <tr>
       <th>动画</th>
@@ -39,7 +39,7 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
   </thead>
   <body>
     <tr>
-      <td>移动/Move</td>
+      <td>移动</td>
       <td>
         <img src="docs/imgs/hanim-demo.move.gif" width="200">
       </td>
@@ -71,7 +71,7 @@ static hanim::HAnimate::Status scale() {
       </td>
     </tr>
     <tr>
-      <td>透明度/Alpha</td>
+      <td>透明度</td>
       <td>
         <img src="docs/imgs/hanim-demo.alpha.gif" width="200">
       </td>
@@ -93,7 +93,7 @@ static hanim::HAnimate::Status alpha() {
       </td>
     </tr>
     <tr>
-      <td>渐变/gradient</td>
+      <td>渐变</td>
       <td>
         <img src="docs/imgs/hanim-demo.gradient.gif" width="200">
       </td>
@@ -115,7 +115,7 @@ static hanim::HAnimate::Status gradient() {
       </td>
     </tr>
     <tr>
-      <td>旋转/rotation</td>
+      <td>旋转</td>
       <td>
         <img src="docs/imgs/hanim-demo.rotation.gif" width="200">
       </td>
@@ -143,7 +143,7 @@ static hanim::HAnimate::Status rotation() {
       </td>
     </tr>
     <tr>
-      <td>路径/path</td>
+      <td>路径</td>
       <td>
         <img src="docs/imgs/hanim-demo.path.gif" width="200">
       </td>
@@ -166,7 +166,7 @@ static hanim::HAnimate::Status path() {
       </td>
     </tr>
     <tr>
-      <td>关键帧路径/pathkf</td>
+      <td>帧路径</td>
       <td>
         <img src="docs/imgs/hanim-demo.pathkf.gif" width="200">
       </td>
