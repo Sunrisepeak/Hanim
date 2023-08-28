@@ -29,11 +29,20 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
 
 > 基础的动画效果及代码实现
 
-<table align="center">
+<h1></h1>
+<table>
+  <thead>
+    <tr>
+      <th>动画</th>
+      <th>效果</th>
+      <th>实现代码</th>
+    </tr>
+  </thead>
+  <body>
     <tr>
       <td>移动/Move</td>
       <td>
-        <img src="docs/imgs/hanim-demo.move.gif">
+        <img src="docs/imgs/hanim-demo.move.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -46,11 +55,11 @@ static bool move() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>缩放/Scale</td>
       <td>
-        <img src="docs/imgs/hanim-demo.scale.gif">
+        <img src="docs/imgs/hanim-demo.scale.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -63,11 +72,11 @@ static bool scale() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>透明度/Alpha</td>
       <td>
-        <img src="docs/imgs/hanim-demo.alpha.gif">
+        <img src="docs/imgs/hanim-demo.alpha.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -86,11 +95,11 @@ static bool alpha() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>渐变/gradient</td>
       <td>
-        <img src="docs/imgs/hanim-demo.gradient.gif">
+        <img src="docs/imgs/hanim-demo.gradient.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -109,11 +118,11 @@ static bool gradient() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>旋转/rotation</td>
       <td>
-        <img src="docs/imgs/hanim-demo.rotation.gif">
+        <img src="docs/imgs/hanim-demo.rotation.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -138,11 +147,11 @@ static bool rotation() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>路径/path</td>
       <td>
-        <img src="docs/imgs/hanim-demo.path.gif">
+        <img src="docs/imgs/hanim-demo.path.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -162,11 +171,11 @@ static bool path() {
         </code></pre>
       </td>
     </tr>
-    </br>
+    <br>
     <tr>
       <td>关键帧路径/pathkf</td>
       <td>
-        <img src="docs/imgs/hanim-demo.pathkf.gif">
+        <img src="docs/imgs/hanim-demo.pathkf.gif" width="200">
       </td>
       <td>
         <pre><code>
@@ -188,6 +197,7 @@ static bool pathKF() {
         </code></pre>
       </td>
     </tr>
+  </body>
 </table>
 
 
