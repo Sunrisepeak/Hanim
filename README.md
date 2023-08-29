@@ -2,7 +2,17 @@
 
 HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离**的动画框架.
 
-[核心设计思想:](docs/design-thinking.md) **Animation =  HEngine(HAnimate, HObject)**
+**Animation =  HEngine(HAnimate, HObject)**
+
+<h1></h1>
+
+| 总揽 | 示例/Demo | 文档 | 备注 |
+| ------------- | ---- | ---- | ---- |
+| [功能特性](#特性/功能) | [基础动画](#基础动画) | 基本用法 |      |
+| [用法](#用法) | [组合动画](#组合动画) | [框架设计思想](docs/design-thinking.md) |      |
+| [示例](#示例/Demo) |      | 动画设计 |      |
+| [Other](#Other) | | 动画对象设计 | |
+| | |  | |
 
 
 
@@ -14,6 +24,93 @@ HAnim是一个**帧驱动**, **跨平台**且**动画行为与动画对象分离
 - 支持对象无关的**基础动画**与**组合动画**设计
 - 支持作为动画库的框架使用, 也可作为一个**动画中间件**嵌入到一个应用或库
 - Header-Only库(需C++ >= 17)
+
+
+
+## 用法
+
+### 头文件
+
+- `Hanim.hpp` - 核心框架和基础动画 - 必需
+- `HanimAnimate.hpp` - 动画库 - 可选
+- `HanimObject.hpp` - 动画对象库 - 可选
+
+
+
+### 代码用例
+
+#### HObject-Lambda 动画对象模式
+
+> 通过把移动动画作用到一个HObject的临时对象上, **实现imgui的按钮移动动画**
+
+```cpp
+static auto moveAnim = hanim::move(100, 50, 100, 200);
+hanim::HEngine::PlayFrame(moveAnim, hanim::HObject(
+        [ & ](int type, const hanim::IAFrame &frame) {
+            //switch (type) {
+                //case hanim::InterpolationAnim::MOVE:
+                    ImGui::SetCursorPosX({ frame.data[0] });
+                    ImGui::SetCursorPosY({ frame.data[1] });
+                    ImGui::Button("Move Anim");
+                    //break;
+                //default: break;
+            //}  
+        }
+));
+```
+
+#### HObject-Impl 动画对象模式
+
+> 通过实现HObject动画对象接口簇, **创建动画对象. **
+>
+> 把移动动画作用到动画对象上, **实现OpenGL中图形移动动画**
+
+```cpp
+class Button : public hanim::HObjectTemplate {
+public:
+    Button() : HObjectTemplate() {
+        _mX = _mY = 0;
+        _mW = _mH = 85;
+        _mR = 153;
+        _mG = _mB = 255;
+        _mA = 255;
+    }
+
+protected: // interface impl
+    void _render() override {
+
+        glColor4f(_mR / 255, _mG / 255, _mB / 255, _mA / 255);
+        //glColor3ui((int)_mR, (int)_mG, (int)_mB);
+
+        glBegin(GL_QUADS);
+
+        glVertex2f(_mX, _mY);
+        glVertex2f(_mX + _mW, _mY);
+        glVertex2f(_mX + _mW, _mY + _mH);
+        glVertex2f(_mX, _mY + _mH);
+
+        glEnd();
+
+        glFlush();
+    }
+};
+
+int main() {
+    // opengl init
+
+    auto moveAnim = hanim::move(100, 50, 100, 200);
+    Button btn = Button();
+
+    while (flag) {
+        // ...
+        hanim::HEngine::PlayFrame(moveAnim, btn);
+        //...
+    }
+    // opengl deinit
+}
+```
+
+
 
 
 
@@ -196,6 +293,8 @@ static hanim::HAnimate::Status pathKF() {
 
 ### 组合动画
 
+> 使用多个基础动画设计的组合动画
+
 <table align = "center">
   <thead>
     <tr>
@@ -288,62 +387,8 @@ public:
   </body>
 </table>
 
+
 **注:** 更多Demo及细节, 可参考examples目录对应实现
-
-## 使用方法
-
-### HObject临时对象 - 立即模式 - imgui
-
-```cpp
-    auto gMove = hanim::move(100, 50, 100, 200);
-
-    while (!glfwWindowShouldClose(window)) {
-        // ...
-
-        ImGui::Begin("Hanim: Move");
-        hanim::HEngine::PlayFrame(gMove, hanim::HObject(
-            [ & ](int type, const hanim::IAFrame &frame) {
-                switch (type) {
-                    case hanim::InterpolationAnim::MOVE:
-                        ImGui::SetCursorPosX({ frame.data[0] });
-                        ImGui::SetCursorPosY({ frame.data[1] });
-                        break;
-                    default:
-                        break;
-                }
-                ImGui::Button("Move Anim");
-            }
-        ));
-        ImGui::End();
-
-        // ...
-    }
-```
-
-### HObject对象 - 立即模式 - opengl
-
-```cpp
-    // hanim1: create animate
-    auto button = hanim::object::opengl::Button();
-    auto gMove = hanim::move(100, 50, 100, 200);
-    gMove.start();
-
-    while (!glfwWindowShouldClose(window)) {
-        //...
-        // hanim2: exec animate
-        hanim::HEngine::PlayFrame(gMove, button);
-
-        //...
-    }
-```
-
-### HObject对象 - 保留模式 - qt
-
-```cpp
-    hanim::object::qt::Button button("move", &window);
-    auto gMove = hanim::move(100, 50, 100, 200);
-    hanim::HEngine::Play(gMove, button);
-```
 
 
 
