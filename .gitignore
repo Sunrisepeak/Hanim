@@ -32,10 +32,8 @@
 *.app
 
 # Other
-./*/.xmake
-./*/build
-examples/useage-in-frameworks/.xmake
-examples/useage-in-frameworks/build
+examples/*/.xmake
+examples/*/build
 examples/useage-in-frameworks/*/.xmake
 examples/useage-in-frameworks/*/build
 .vscode

@@ -243,6 +243,9 @@ struct FAFrame {
 };
 
 using Frame = std::variant<IAFrame, FAFrame>;
+
+template<typename HType>
+static void __HEngineUnregister(HType *ptr);
 class HAnimate {
     friend class HEngine;
 public:
@@ -280,7 +283,10 @@ public:
 
     HAnimate(AType aType) : HAnimate() { __mType = aType; }
 
-    virtual ~HAnimate(); // impl in partII
+    virtual ~HAnimate() {
+        __mStatus = Status::Stopped;
+        __HEngineUnregister<HAnimate>(this);
+    }
 
 public: // basic info
     // getter
@@ -541,7 +547,11 @@ public: // contor
     HObject(IAnimCallBack iacb) : HObject(iacb, nullptr) { }
     HObject(FAnimCallBack facb) : HObject(nullptr, facb) { }
     HObject(IAnimCallBack iacb, FAnimCallBack facb) : __mIAnimCB { iacb }, __mFAnimCB { facb } { }
-    virtual ~HObject(); // impl in partII
+
+    virtual ~HObject() {
+        __HEngineUnregister<HObject>(this);
+    }
+
 protected: // anim interface
     virtual void _interpolationHAnimate(int type, const IAFrame &frame) {
         if(__mIAnimCB) __mIAnimCB(type, frame);
@@ -900,13 +910,9 @@ private:
 
 // -----------------------------------------------HAnim PartII: method impl-------------------------------------------------------
 
-HAnimate::~HAnimate() {
-    __mStatus = Status::Stopped;
-    HEngine::_unregister(this);
-}
-
-HObject::~HObject() {
-    HEngine::_unregister(this);
+template<typename HType>
+static void __HEngineUnregister(HType *ptr) {
+    HEngine::_unregister(ptr);
 }
 
 // -----------------------------------------------HAnim PartIII: Animate Base-------------------------------------------------------
