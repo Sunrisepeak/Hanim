@@ -9,12 +9,15 @@
 
 // ffmpeg -i hanim-demo.xx.mkv -s 200x200 hanim-demo.xx.gif
 
-#include <GL/gl.h>
+#ifdef _WIN32 || _WIN64
+#include <Windows.h> // to avoid gl.h type issue on window-platform
+#endif
+
 #include <GLFW/glfw3.h>
 
 #include <anim-demo.hpp>
 
-#include <OpenGLRecorder.hpp>
+#include <XRecorder/OpenGLRecorder.hpp>
 
 int main() {
     if (!glfwInit()) {

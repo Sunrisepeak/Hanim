@@ -9,7 +9,10 @@
 
 
 
-#include <GL/gl.h>
+#ifdef _WIN32 || _WIN64
+#include <windows.h> // to avoid gl.h win-type issue
+#endif
+
 #include <GLFW/glfw3.h>
 
 #include <Hanim.hpp>
@@ -19,7 +22,7 @@
 #include <HanimObject.hpp>
 
 #ifdef HANIM_ENABLE_XRECORDER_OPENGL
-#include <OpenGLRecorder.hpp>
+#include <XRecorder/OpenGLRecorder.hpp>
 #endif
 
 int main() {
