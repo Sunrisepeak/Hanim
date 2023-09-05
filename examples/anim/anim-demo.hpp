@@ -99,7 +99,7 @@ static hanim::HAnimate::Status path() {
     static auto path = hanim::path<hanim::InterpolationAnim::Var::X>(
         0, 360, // x from 0 to 360
         [](float x) {
-            float radian = x * M_PI / 180;
+            float radian = x * HANIM_PI / 180;
             return 200 + 100 * std::sin(radian * 2);
         },
         30

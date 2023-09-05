@@ -1,0 +1,3 @@
+[submodule "third-party/XRecorder"]
+	path = third-party/XRecorder
+	url = git@github.com:Sunrisepeak/XRecorder.git

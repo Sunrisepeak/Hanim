@@ -24,6 +24,7 @@
 #include <exception>
 
 #define HANIM_VERIFY (0x68616e696d)
+#define HANIM_PI 3.14159265358979323846   // pi
 
 namespace hanim {
 
@@ -35,7 +36,7 @@ static float sinDegree(float degree) {
 
     static float __sinTable[360 + 1] = { 0 };
 
-    float radian = degree * M_PI / 180;
+    float radian = degree * HANIM_PI / 180;
 
     if (degree != static_cast<int>(degree))
         return std::sin(radian);
@@ -155,11 +156,11 @@ protected:
 
     // Sin
     float InSin(float x) {
-        return 1.0 - std::cos(x * (M_PI / 2));
+        return 1.0 - std::cos(x * (HANIM_PI / 2));
     }
 
     float OutSin(float x) {
-        return std::sin(x * (M_PI / 2));
+        return std::sin(x * (HANIM_PI / 2));
     }
 
     float InOutSin(float x) {
@@ -172,7 +173,7 @@ protected:
 
     // Elastic
     float InElastic(float x) {
-        const double c4 = (2 * M_PI) / 3;
+        const double c4 = (2 * HANIM_PI) / 3;
         if (x == 0 || x == 1) {
             return x;
         } else {
@@ -181,7 +182,7 @@ protected:
     }
 
     float OutElastic(float x) {
-        const double c4 = (2 * M_PI) / 3;
+        const double c4 = (2 * HANIM_PI) / 3;
         if (x == 0 || x == 1) {
             return x;
         } else {
@@ -217,7 +218,7 @@ struct IAFrame {
             +------> 0
         */
         std::vector<float> homoCoordinate1 {x - data[0], y - data[1], 1}, homoCoordinate2 {0, 0, 0};
-        float radian = data[2] * M_PI / 180;
+        float radian = data[2] * HANIM_PI / 180;
         float sin = std::sin(radian);
         float cos = std::cos(radian);
         float rotationMatrix[3][3] = {
@@ -343,7 +344,7 @@ public: // Anim Tree OP
         __mFrameTrackVec.back() = frameTrackIndex;
     }
 protected: // interface
-    virtual Frame _nextFrame(float fIndex) { } // TODO: balance Anim and Anim Node 
+    virtual Frame _nextFrame(float fIndex) { return IAFrame(); } // TODO: balance Anim and Anim Node 
 protected:
     int _mSubType;
     unsigned int _mFrameNums;
@@ -813,7 +814,7 @@ private:
 
     private:
         bool __mExit;
-        int __mTriggerInterval; // micro-sec
+        unsigned int __mTriggerInterval; // micro-sec
         std::mutex __mUpdateMutex;
         std::thread __mAnimDriverThread;
         std::vector<AOPair> __mAOVec; // TODO: use dlist
