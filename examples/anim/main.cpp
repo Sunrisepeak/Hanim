@@ -9,7 +9,7 @@
 
 // ffmpeg -i hanim-demo.xx.mkv -s 200x200 hanim-demo.xx.gif
 
-#ifdef _WIN32 || _WIN64
+#if defined(_WIN64) || defined(_WIN32)
 #include <Windows.h> // to avoid gl.h type issue on window-platform
 #endif
 
