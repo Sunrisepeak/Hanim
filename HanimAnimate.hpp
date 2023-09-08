@@ -18,82 +18,64 @@
 
 namespace hanim {
 namespace animate {
-class Focus : public ComposeAnim {
-public:
-    Focus(int frameNumbers = 60) {
+
+constexpr int DEFAULT_FRAME_NUM = 60;
+
+struct Focus : public ComposeAnim {
+    Focus() {
         ComposeAnim::scale(1, 1.1)
             .setEasingCurve(hanim::EasingCurve::OUT_ELASTIC)
-            .setFrameNums(frameNumbers);
+            .setFrameNums(DEFAULT_FRAME_NUM);
 
         ComposeAnim::alpha(200, 255)
             .setEasingCurve(hanim::EasingCurve::ECType::IN_SIN)
-            .setFrameNums(frameNumbers);
-        
-        this->setFrameNums(frameNumbers);
+            .setFrameNums(DEFAULT_FRAME_NUM);
+
+        this->setFrameNums(DEFAULT_FRAME_NUM);
     }
 };
 
-class BreathingAnim : public HAnimate {
-public:
-    BreathingAnim(float r, float g, float b, float _a = 0.5) {
+struct BreathingAnim : public HAnimate {
+    BreathingAnim(float r, float g, float b) {
+        addAnim(hanim::gradient(r, g, b, r, g, b, DEFAULT_FRAME_NUM));
 
-        addAnim(hanim::gradient(r * _a, g * _a, b * _a, r, g, b, 30))
-            .setPlayType(PlayType::RT);
+        addAnim(hanim::alpha(0, 255, DEFAULT_FRAME_NUM / 2), 0);
+        addAnim(hanim::alpha(255, 0, DEFAULT_FRAME_NUM / 2));
+        setFrameTrackIndex( DEFAULT_FRAME_NUM / 2);
 
         setPlayType(PlayType::RT);
-
-        setFrameNums(60);
+        setFrameNums(DEFAULT_FRAME_NUM);
 
         start();
     }
 };
 
 struct FadeIn : public ComposeAnim {
-
-    FadeIn(
-        int x, int y,
-        int frameNumbers = 60,
-        std::function<HAnimate&& ()> pathAnimGenFunc = nullptr
-    ) {
-        if (pathAnimGenFunc) {
-            addAnim(pathAnimGenFunc());
-        } else {
-            ComposeAnim::move(0, y, x, y)
-                .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
-                .setFrameNums(frameNumbers);
-        }
+    FadeIn(int x1, int y1, int x2, int y2) {
+        ComposeAnim::move(x1, y1, x2, y2)
+            .setEasingCurve(hanim::EasingCurve::ECType::IN_QUAD)
+            .setFrameNums(DEFAULT_FRAME_NUM);
 
         ComposeAnim::alpha(0, 255)
             .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
-            .setFrameNums(frameNumbers);
+            .setFrameNums(DEFAULT_FRAME_NUM);
 
-        setFrameNums(frameNumbers);
+        setFrameNums(DEFAULT_FRAME_NUM);
     }
-
 };
 
 struct FadeOut : public ComposeAnim {
-
-    FadeOut(
-        int x, int y,
-        int frameNumbers = 60,
-        std::function<HAnimate&& ()> pathAnimGenFunc = nullptr
-    ) {
-        if (pathAnimGenFunc) {
-            addAnim(pathAnimGenFunc());
-        } else {
-            ComposeAnim::move(x, y, x * 2, y)
-                .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
-                .setFrameNums(frameNumbers);
-        }
+    FadeOut(int x1, int y1, int x2, int y2) {
+        ComposeAnim::move(x1, y1, x2, y2)
+            .setEasingCurve(hanim::EasingCurve::ECType::OUT_QUAD)
+            .setFrameNums(DEFAULT_FRAME_NUM);
 
         ComposeAnim::alpha(255, 0)
-            .setEasingCurve(hanim::EasingCurve::ECType::IN_CUBIC)
-            .setFrameNums(frameNumbers);
+            .setEasingCurve(hanim::EasingCurve::ECType::OUT_CUBIC)
+            .setFrameNums(DEFAULT_FRAME_NUM);
 
-        setFrameNums(frameNumbers);
+        setFrameNums(DEFAULT_FRAME_NUM);
     }
-
 };
 
 } // animate namespace end

@@ -27,7 +27,7 @@ auto gPath = hanim::path<hanim::InterpolationAnim::Var::X>(0, 400, gPathFunc, AN
 
 auto gPathKeyFrame = hanim::path({}, ANIM_DEMO_FRAMES);
 auto gGradient = hanim::gradient(0, 50,200, 0, 200, 20, ANIM_DEMO_FRAMES);
-auto gfocusHighlight = hanim::animate::Focus(30);
+auto gfocusHighlight = hanim::animate::Focus();
 auto gRotation = hanim::rotation(150, 150, 0, 360, ANIM_DEMO_FRAMES);
 
 static void init() {

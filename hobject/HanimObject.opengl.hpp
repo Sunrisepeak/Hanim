@@ -33,7 +33,6 @@ protected: // interface impl
     void _render() override {
 
         glColor4f(_mR / 255, _mG / 255, _mB / 255, _mA / 255);
-        //glColor3ui((int)_mR, (int)_mG, (int)_mB);
 
         glBegin(GL_QUADS);
 
