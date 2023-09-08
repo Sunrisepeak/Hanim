@@ -272,17 +272,65 @@ public:
         Finished
     };
 
-public:
+public: // big-five
     HAnimate() :
-        __mAutoPlayFlag { 0 },
+        _mSubType { 0 },
         _mFrameNums { 120 },
-        __mCurrentFrames { 0 },
+        __mAutoPlayFlag { 0 },
         __mType { AType::ATREE },
         __mPlayType { PlayType::OneShot },
         __mStatus { Status::Stopped },
-        __mPlayDirect { 1 } { start(); }
+        __mCurrentFrames { 0 },
+        __mPlayDirect { 1 },
+        __mEasingCurve {},
+        __mAnimVec {},
+        __mFrameTrackVec {} { /* body */ }
 
     HAnimate(AType aType) : HAnimate() { __mType = aType; }
+
+    HAnimate(const HAnimate &anim) { *this = anim; }
+    HAnimate &operator=(const HAnimate &anim) {
+        _mSubType = anim._mSubType;
+        _mFrameNums = anim._mFrameNums;
+
+        // HEngine data
+        __mAutoPlayFlag = anim.__mAutoPlayFlag;
+        __mType = anim.__mType;
+        __mPlayType = anim.__mPlayType;
+        __mStatus = anim.__mStatus;
+        __mCurrentFrames = anim.__mCurrentFrames;
+        __mPlayDirect = anim.__mPlayDirect;
+        __mEasingCurve = anim.__mEasingCurve;
+
+        // Anim Tree Data
+        for (auto ptr : anim.__mAnimVec) { // copy
+            __mAnimVec.push_back(std::make_shared<HAnimate>(*ptr));
+        }
+        __mFrameTrackVec = anim.__mFrameTrackVec;
+
+        return *this;
+    }
+
+    HAnimate(const HAnimate &&anim) { *this = std::move(anim); }
+    HAnimate &operator=(HAnimate &&anim) {
+        _mSubType = anim._mSubType; anim._mSubType = 0;
+        _mFrameNums = anim._mFrameNums; anim._mFrameNums = 0;
+
+        // HEngine data
+        __mAutoPlayFlag = anim.__mAutoPlayFlag; anim.__mAutoPlayFlag = 0;
+        __mType = anim.__mType; anim.__mType = AType::ATREE;
+        __mPlayType = anim.__mPlayType; anim.__mPlayType = PlayType::OneShot;
+        __mStatus = anim.__mStatus; anim.__mStatus = Status::Stopped;
+        __mCurrentFrames = anim.__mCurrentFrames; anim.__mCurrentFrames = 0;
+        __mPlayDirect = anim.__mPlayDirect; anim.__mPlayDirect = 1;
+        __mEasingCurve = anim.__mEasingCurve; anim.__mEasingCurve = EasingCurve(); // TODO
+
+        // Anim Tree Data
+        __mAnimVec = std::move(anim.__mAnimVec);
+        __mFrameTrackVec = std::move(anim.__mFrameTrackVec);
+
+        return *this;
+    }
 
     virtual ~HAnimate() {
         __mStatus = Status::Stopped;
@@ -405,6 +453,32 @@ public:
         _mFrameNums = frameNums;
     }
 
+    InterpolationAnim(const InterpolationAnim &iAnim) { *this = iAnim; }
+    InterpolationAnim & operator=(const InterpolationAnim &iAnim) {
+        HAnimate::operator=(iAnim);
+
+        _mVarFlag = iAnim._mVarFlag;
+        _mStartFrame = iAnim._mStartFrame;
+        _mEndFrame = iAnim._mEndFrame;
+        _mPathFunc = iAnim._mPathFunc;
+        _mKeyFrameVec = iAnim._mKeyFrameVec;
+
+        return *this;
+    }
+
+    InterpolationAnim(InterpolationAnim &&iAnim) { *this = std::move(iAnim); }
+    InterpolationAnim & operator=(InterpolationAnim &&iAnim) {
+        HAnimate::operator=(std::forward<InterpolationAnim>(iAnim));
+
+        _mVarFlag = iAnim._mVarFlag; iAnim._mVarFlag = Var::N;
+        _mStartFrame = std::move(iAnim._mStartFrame);
+        _mEndFrame = std::move(iAnim._mEndFrame);
+        _mPathFunc = std::move(iAnim._mPathFunc);
+        _mKeyFrameVec = std::move(iAnim._mKeyFrameVec);
+
+        return *this;
+    }
+
 public:
     void setStartFrame(const IAFrame &startFrame) { _mStartFrame = startFrame; }
     void setEndFrame(const IAFrame &endFrame) { _mEndFrame = endFrame; }
@@ -488,6 +562,17 @@ static InterpolationAnim path(const std::vector<IAFrame> &keyFrameVec, unsigned 
 
 class ComposeAnim : public HAnimate {
     friend class HEngine;
+
+public:
+    ComposeAnim() : HAnimate() {
+        start();
+    }
+
+    ComposeAnim(const ComposeAnim &) = default;
+    ComposeAnim & operator=(const ComposeAnim &) = default;
+    ComposeAnim(ComposeAnim &&) = default;
+    ComposeAnim & operator=(ComposeAnim &&) = default;
+
 public:
     HAnimate & move(float x1, float y1, float x2, float y2) {
         return addAnim(hanim::move(x1, y1, x2, y2));
@@ -549,6 +634,22 @@ public: // contor
     HObject(FAnimCallBack facb) : HObject(nullptr, facb) { }
     HObject(IAnimCallBack iacb, FAnimCallBack facb) : __mIAnimCB { iacb }, __mFAnimCB { facb } { }
 
+    HObject(const HObject &hObj) { *this = hObj; }
+    HObject & operator=(const HObject &hObj) {
+        __mAutoPlayFlag = hObj.__mAutoPlayFlag;
+        __mIAnimCB = hObj.__mIAnimCB;
+        __mFAnimCB = hObj.__mFAnimCB;
+        return *this;
+    }
+
+    HObject(HObject &&hObj) { *this = std::move(hObj); }
+    HObject & operator=(HObject &&hObj) {
+        __mAutoPlayFlag = hObj.__mAutoPlayFlag; hObj.__mAutoPlayFlag = 0;
+        __mIAnimCB = std::move(hObj.__mIAnimCB);
+        __mFAnimCB = std::move(hObj.__mFAnimCB);
+        return *this;
+    }
+
     virtual ~HObject() {
         __HEngineUnregister<HObject>(this);
     }
@@ -571,19 +672,26 @@ private:
     FAnimCallBack __mFAnimCB; // for support tmp obj
 };
 
-class HObjectTemplateBase : public HObject {
+// property bind
+class HObjectIAnimPropertyBind : public HObject {
 public:
     using PropretyRef = float &;
 
 public:
-    HObjectTemplateBase(
+    HObjectIAnimPropertyBind(
         PropretyRef x, PropretyRef y,
         PropretyRef w, PropretyRef h,
         PropretyRef r, PropretyRef g, PropretyRef b, PropretyRef a
     ) : HObject(),
         __mX { x }, __mY { y },
         __mW { w }, __mH { h },
-        __mR { r }, __mG { g }, __mB { b }, __mA { a } { }
+        __mR { r }, __mG { g }, __mB { b }, __mA { a } { /* body */ }
+
+    // Note: copy/move cntor/assign-op need sub-class to impl
+    HObjectIAnimPropertyBind & operator=(const HObjectIAnimPropertyBind &hObjTBase) = delete;
+    HObjectIAnimPropertyBind & operator=(HObjectIAnimPropertyBind &&hObjTBase) = delete;
+    HObjectIAnimPropertyBind(const HObjectIAnimPropertyBind &hObjTBase) = delete;
+    HObjectIAnimPropertyBind(HObjectIAnimPropertyBind &&hObjTBase) = delete;
 
 protected:
     void _interpolationHAnimate(int type, const hanim::IAFrame &frame) override final {
@@ -629,12 +737,42 @@ private:
     PropretyRef __mR, __mG, __mB, __mA;
 };
 
-class HObjectTemplate : public HObjectTemplateBase {
+class HObjectTemplate : public HObjectIAnimPropertyBind {
     using Proprety = float;
 public:
-    HObjectTemplate() : HObjectTemplateBase(_mX, _mY, _mW, _mH, _mR, _mG, _mB, _mA) {
+    HObjectTemplate() : HObjectIAnimPropertyBind(_mX, _mY, _mW, _mH, _mR, _mG, _mB, _mA) {
         _mX = _mY = _mW = _mH = _mR = _mG = _mB = _mA = -1;
     }
+
+    HObjectTemplate(const HObjectTemplate &hObjTemplate) : HObjectTemplate() { *this = hObjTemplate; }
+    HObjectTemplate & operator=(const HObjectTemplate &hObjTemplate) {
+        _mX = hObjTemplate._mX;
+        _mY = hObjTemplate._mY;
+        _mW = hObjTemplate._mW;
+        _mH = hObjTemplate._mH;
+        _mR = hObjTemplate._mR;
+        _mG = hObjTemplate._mG;
+        _mB = hObjTemplate._mB;
+        _mA = hObjTemplate._mA;
+        return *this;
+    }
+
+    HObjectTemplate(HObjectTemplate &&hObjTemplate) : HObjectTemplate() { *this = std::move(hObjTemplate); }
+    HObjectTemplate & operator=(HObjectTemplate &&hObjTemplate) {
+        _mX = hObjTemplate._mX;
+        _mY = hObjTemplate._mY;
+        _mW = hObjTemplate._mW;
+        _mH = hObjTemplate._mH;
+        _mR = hObjTemplate._mR;
+        _mG = hObjTemplate._mG;
+        _mB = hObjTemplate._mB;
+        _mA = hObjTemplate._mA;
+        // reset
+        hObjTemplate._mX = hObjTemplate._mY = hObjTemplate._mW = hObjTemplate._mH = hObjTemplate._mR = hObjTemplate._mG = hObjTemplate._mB = hObjTemplate._mA = -1;
+        return *this;
+    }
+
+
 public: // setter / getter
     void getPos(float &x, float &y) const {
         x = _mX;
@@ -919,56 +1057,68 @@ static void __HEngineUnregister(HType *ptr) {
 // -----------------------------------------------HAnim PartIII: Animate Base-------------------------------------------------------
 
 static InterpolationAnim move(float x1, float y1, float x2, float y2, unsigned int frameNums) {
-    return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::MOVE, IAFrame({x1, y1}),
         IAFrame({x2, y2}),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 static InterpolationAnim scale(float start, float end, unsigned int frameNums) {
-    return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::SCALE_1,
         IAFrame(start),
         IAFrame(end),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 static InterpolationAnim scale(float width1, float height1, float width2, float height2, unsigned int frameNums) {
-    return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::SCALE_2,
         IAFrame({width1, height1}),
         IAFrame({width2, height2}),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 static InterpolationAnim alpha(float start, float end, unsigned int frameNums) {
-    return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::ALPHA,
         IAFrame(start),
         IAFrame(end),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 static InterpolationAnim gradient(int r1, int g1, int b1, int r2, int g2, int b2, unsigned int frameNums) {
-    return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::GRADIENT,
         IAFrame({r1 % 256 * 1.f, g1 % 256 * 1.f, b1 % 256 * 1.f}),
         IAFrame({r2 % 256 * 1.f, g2 % 256 * 1.f, b2 % 256 * 1.f}),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 static InterpolationAnim rotation(float x, float y, float angle1, float angle2, unsigned int frameNums) {
-        return InterpolationAnim(
+    auto anim = InterpolationAnim(
         InterpolationAnim::Rotation,
         IAFrame({x, y, angle1}),
         IAFrame({x, y, angle2}),
         frameNums
     );
+    anim.start();
+    return anim;
 }
 
 template <InterpolationAnim::Var Var = InterpolationAnim::Var::X>
@@ -977,6 +1127,7 @@ static InterpolationAnim path(float start, float end, InterpolationAnim::PathFun
     anim.setFrameNums(frameNums);
     anim.setInterval<Var>(start, end);
     anim.setPathFunc(pFunc);
+    anim.start();
     return anim;
 }
 
@@ -986,6 +1137,7 @@ static InterpolationAnim path(const std::vector<IAFrame> &keyFrameVec, unsigned 
     for (auto kF : keyFrameVec) {
         anim.addPathKeyFrame(kF);
     }
+    anim.start();
     return anim;
 }
 
