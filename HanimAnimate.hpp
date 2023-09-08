@@ -41,6 +41,10 @@ public:
             .setPlayType(PlayType::RT);
 
         setPlayType(PlayType::RT);
+
+        setFrameNums(60);
+
+        start();
     }
 };
 
