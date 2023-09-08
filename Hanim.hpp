@@ -247,7 +247,7 @@ using Frame = std::variant<IAFrame, FAFrame>;
 
 template<typename HType>
 static void __HEngineUnregister(HType *ptr);
-class HAnimate {
+class HAnimate { // Animate Tree
     friend class HEngine;
 public:
 
@@ -256,6 +256,11 @@ public:
         CANIM = 0, // custom anim
         IANIM = 1, // interpolation anim
         FANIM = 2, // frame anime
+    };
+
+    enum Direction {
+        Forward = 1,
+        Backward = -1
     };
 
     enum class PlayType {
@@ -281,7 +286,7 @@ public: // big-five
         __mPlayType { PlayType::OneShot },
         __mStatus { Status::Stopped },
         __mCurrentFrames { 0 },
-        __mPlayDirect { 1 },
+        __mDirection { Direction::Forward },
         __mEasingCurve {},
         __mAnimVec {},
         __mFrameTrackVec {} { /* body */ }
@@ -299,7 +304,7 @@ public: // big-five
         __mPlayType = anim.__mPlayType;
         __mStatus = anim.__mStatus;
         __mCurrentFrames = anim.__mCurrentFrames;
-        __mPlayDirect = anim.__mPlayDirect;
+        __mDirection = anim.__mDirection;
         __mEasingCurve = anim.__mEasingCurve;
 
         // Anim Tree Data
@@ -322,7 +327,7 @@ public: // big-five
         __mPlayType = anim.__mPlayType; anim.__mPlayType = PlayType::OneShot;
         __mStatus = anim.__mStatus; anim.__mStatus = Status::Stopped;
         __mCurrentFrames = anim.__mCurrentFrames; anim.__mCurrentFrames = 0;
-        __mPlayDirect = anim.__mPlayDirect; anim.__mPlayDirect = 1;
+        __mDirection = anim.__mDirection; anim.__mDirection = Direction::Forward;
         __mEasingCurve = anim.__mEasingCurve; anim.__mEasingCurve = EasingCurve(); // TODO
 
         // Anim Tree Data
@@ -340,13 +345,52 @@ public: // big-five
 public: // basic info
     // getter
     int getFrameNums() const { return _mFrameNums; }
+
     PlayType getPlayType() const { return __mPlayType; }
+
     int getCurrentFrame() const { return __mCurrentFrames; }
+    
     // setter
-    virtual HAnimate & setFrameNums(int frames) { _mFrameNums = frames; return *this; }
-    HAnimate & setEasingCurve(EasingCurve ec) { __mEasingCurve = ec; return *this; }
-    HAnimate & setPlayType(PlayType pType) { __mPlayType = pType; return *this; }
-    HAnimate & setCurrentFrame(int frameIndex) { __mCurrentFrames = frameIndex; return *this; }
+    HAnimate & setFrameNums(int frames) {
+        _mFrameNums = frames;
+        return *this;
+    }
+    
+    HAnimate & setEasingCurve(EasingCurve ec) {
+        __mEasingCurve = ec;
+        return *this;
+    }
+
+    HAnimate & setDirection(Direction direction) {
+        __mDirection = direction;
+        return *this;
+    }
+
+    HAnimate & setPlayType(PlayType pType) {
+        __mPlayType = pType;
+        return *this;
+    }
+
+    HAnimate & setCurrentFrame(int frameIndex) {
+
+        assert(frameIndex >= 0);
+
+        if (frameIndex < _mFrameNums) {
+            __mCurrentFrames = frameIndex;
+        } else {
+            __mCurrentFrames = _mFrameNums;
+        }
+
+        for (int i = 0; i < __mAnimVec.size(); i++) {
+            int subFrameIndex = 0;
+            if (frameIndex > __mFrameTrackVec[i])
+                subFrameIndex = frameIndex - __mFrameTrackVec[i];
+            __mAnimVec[i]->setCurrentFrame(subFrameIndex);
+        }
+
+        return *this;
+    }
+
 public: // status control
     virtual void start(bool forceUpdate = false) {
 
@@ -402,7 +446,7 @@ private: // HEngine data
     PlayType __mPlayType;
     Status __mStatus;
     int __mCurrentFrames;
-    float __mPlayDirect;
+    float __mDirection;
     /*
         __mEasingCurve(__mCurrentFrames) / real-frames
             ^
@@ -573,7 +617,9 @@ public:
     ComposeAnim(ComposeAnim &&) = default;
     ComposeAnim & operator=(ComposeAnim &&) = default;
 
-public:
+
+
+protected:
     HAnimate & move(float x1, float y1, float x2, float y2) {
         return addAnim(hanim::move(x1, y1, x2, y2));
     }
@@ -976,7 +1022,7 @@ private:
         if (anim.__mType == HAnimate::ATREE) {
             int cnt = 0;
             for (auto nodePtr : anim.__mAnimVec) {
-                nodePtr->__mPlayDirect = anim.__mPlayDirect;
+                nodePtr->__mDirection = anim.__mDirection;
                 nodePtr->__mStatus = anim.__mStatus;
                 __statusSync(*nodePtr);
             }
@@ -989,11 +1035,11 @@ private:
 
         if (anim.__mStatus == HAnimate::Status::Running) {
             if (anim.__mCurrentFrames == 0) {
-                anim.__mPlayDirect = 1;
+                anim.__mDirection = HAnimate::Direction::Forward;
                 __Instance().__statusSync(anim);
             } else if (anim.__mCurrentFrames == anim._mFrameNums + 1) {
                 anim.__mCurrentFrames--;
-                if (anim.__mPlayDirect == 1)
+                if (anim.__mDirection == HAnimate::Direction::Forward)
                     subType = -1; // anim  end
             }
 
@@ -1024,7 +1070,7 @@ private:
 
             if (subType == -1) { // anim end
                 if (anim.__mPlayType == HAnimate::PlayType::RT) {
-                    anim.__mPlayDirect = -1;
+                    anim.__mDirection = HAnimate::Direction::Backward;
                     __Instance().__statusSync(anim);
                 } else if (anim.__mPlayType == HAnimate::PlayType::Repeat) {
                     anim.start(true);
@@ -1035,7 +1081,7 @@ private:
                 }
             }
 
-            anim.__mCurrentFrames += anim.__mPlayDirect;
+            anim.__mCurrentFrames += anim.__mDirection;
 
         }
 

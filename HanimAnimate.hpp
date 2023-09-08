@@ -18,8 +18,7 @@
 
 namespace hanim {
 namespace animate {
-class Focus : public ComposeAnim {
-public:
+struct Focus : public ComposeAnim {
     Focus(int frameNumbers = 60) {
         ComposeAnim::scale(1, 1.1)
             .setEasingCurve(hanim::EasingCurve::OUT_ELASTIC)
@@ -28,7 +27,7 @@ public:
         ComposeAnim::alpha(200, 255)
             .setEasingCurve(hanim::EasingCurve::ECType::IN_SIN)
             .setFrameNums(frameNumbers);
-        
+
         this->setFrameNums(frameNumbers);
     }
 };
