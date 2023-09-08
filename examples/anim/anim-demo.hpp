@@ -132,7 +132,7 @@ static hanim::HAnimate::Status pathKF() {
 /* compose anim */
 
 static hanim::HAnimate::Status fadeIn() {
-    static auto fadeIn = hanim::animate::FadeIn(300, 200, 60);
+    static auto fadeIn = hanim::animate::FadeIn(0, 200, 300, 200);
     static auto hobj = hanim::object::opengl::Button();
 
     hanim::HEngine::PlayFrame(fadeIn, hobj);
@@ -141,7 +141,7 @@ static hanim::HAnimate::Status fadeIn() {
 }
 
 static hanim::HAnimate::Status fadeOut() {
-    static auto fadeOut = hanim::animate::FadeOut(200, 200, 60);
+    static auto fadeOut = hanim::animate::FadeOut(200, 200, 400, 200);
     static auto hobj = hanim::object::opengl::Button();
 
     hanim::HEngine::PlayFrame(fadeOut, hobj);
@@ -150,7 +150,7 @@ static hanim::HAnimate::Status fadeOut() {
 }
 
 static hanim::HAnimate::Status focus() {
-    static auto focus = hanim::animate::Focus(30);
+    static auto focus = hanim::animate::Focus();
     static auto hobj = hanim::object::opengl::Button();
     static bool init = true;
 

@@ -47,10 +47,12 @@ int main() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, 300, 300, 0, -1, 1);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // support alpha
+    glEnable( GL_BLEND );
 
     // hanim1: create animate
     auto bAnim = hanim::animate::BreathingAnim(0, 0, 255);
-    bAnim.setFrameNums(200);
+    bAnim.setFrameNums(200, true);
 
     auto button = hanim::object::opengl::Button();
     button.setPos(100, 100);

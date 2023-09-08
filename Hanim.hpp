@@ -26,44 +26,11 @@
 #define HANIM_VERIFY (0x68616e696d)
 #define HANIM_PI 3.14159265358979323846   // pi
 
-namespace hanim {
-
-
 // -----------------------------------------------HAnim: Frameworks / Engine -------------------------------------------------------
 
-// TODO: check and verify
-static float sinDegree(float degree) {
-
-    static float __sinTable[360 + 1] = { 0 };
-
-    float radian = degree * HANIM_PI / 180;
-
-    if (degree != static_cast<int>(degree))
-        return std::sin(radian);
-
-    int degreeInt = degree;
-
-    float sign = 1;
-    if (degreeInt < 0) {
-        sign = -1;
-        degreeInt = -degreeInt;
-    }
-
-    degreeInt = degreeInt <= 360 ? degreeInt : degreeInt % 360;
-
-    if ( __sinTable[degreeInt] == 0) {
-        __sinTable[degreeInt] = std::sin(radian);
-    }
-
-    return __sinTable[degreeInt] * sign;
-}
+namespace hanim {
 
 // -----------------------------------------------HAnim PartI: Core-------------------------------------------------------
-
-static float cosDegree(float degree) {
-    return sinDegree(90 - degree);
-}
-
 
 class EasingCurve {
 public:
@@ -349,13 +316,20 @@ public: // basic info
     PlayType getPlayType() const { return __mPlayType; }
 
     int getCurrentFrame() const { return __mCurrentFrames; }
-    
+
     // setter
-    HAnimate & setFrameNums(int frames) {
+    HAnimate & setFrameNums(int frames, bool syncScale = false) {
+        if (syncScale) {
+            float scale = frames * 1.f / _mFrameNums;
+            for (int i = 0; i < __mAnimVec.size(); i++) {
+                __mFrameTrackVec[i] *= scale;
+                __mAnimVec[i]->setFrameNums(__mAnimVec[i]->_mFrameNums * scale, true);
+            }
+        }
         _mFrameNums = frames;
         return *this;
     }
-    
+
     HAnimate & setEasingCurve(EasingCurve ec) {
         __mEasingCurve = ec;
         return *this;
