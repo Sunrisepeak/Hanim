@@ -205,9 +205,31 @@ struct IAFrame {
     }
 };
 
+struct RGBA {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
+
 struct FAFrame {
-    unsigned int width, height, channal;
-    void *data;
+// type
+    enum ColorType {
+        RGB,
+        RGBA,
+    };
+// constructor
+    FAFrame(
+        std::vector<unsigned char> data,
+        unsigned int w, unsigned h,
+        ColorType _ctype = ColorType::RGBA
+    ) : ctype {_ctype }, width { w }, height { h } {
+        dataPtr = std::make_shared<std::vector<unsigned char>>(data);
+    }
+// data
+    ColorType ctype;
+    unsigned int width, height;
+    std::shared_ptr<std::vector<unsigned char>> dataPtr;
 };
 
 using Frame = std::variant<IAFrame, FAFrame>;
@@ -591,8 +613,6 @@ public:
     ComposeAnim(ComposeAnim &&) = default;
     ComposeAnim & operator=(ComposeAnim &&) = default;
 
-
-
 protected:
     HAnimate & move(float x1, float y1, float x2, float y2) {
         return addAnim(hanim::move(x1, y1, x2, y2));
@@ -636,6 +656,8 @@ public:
     void addFAFrame(const FAFrame &frame) { __mFrameVec.push_back(frame); }
 protected:
     virtual Frame _nextFrame(float frameIndex) override {
+        if (frameIndex >= _mFrameNums)
+            return __mFrameVec.back();
         auto realFrameIndex = frameIndex / _mFrameNums * __mFrameVec.size(); 
         return __mFrameVec[realFrameIndex];
     }

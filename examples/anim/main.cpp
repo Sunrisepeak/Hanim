@@ -33,11 +33,18 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
+
+    // config projection matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, w, h, 0, -1, 1);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // support alpha
+
+    // support alpha
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
+
+    // 2d texture
+    //glEnable(GL_TEXTURE_2D);
 
 
     static xrecorder::OpenGLRecorder<500, 500, 30> xr("hanim-demo");
@@ -57,13 +64,14 @@ int main() {
         // compose anim
         //if (hanim::demo::fadeIn() == hanim::HAnimate::Status::Finished) break;
         //if (hanim::demo::fadeOut() == hanim::HAnimate::Status::Finished) break;
-        if (hanim::demo::focus() == hanim::HAnimate::Status::Finished) break;
-
+        //if (hanim::demo::focus() == hanim::HAnimate::Status::Finished) break;
+        if (hanim::demo::image() == hanim::HAnimate::Status::Finished) break;
 
         xr.captureFrameData();
         xr.saveToVideo();
 
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     glfwDestroyWindow(window);

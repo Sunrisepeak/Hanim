@@ -166,6 +166,52 @@ static hanim::HAnimate::Status focus() {
     return focus.status();
 }
 
+static hanim::HAnimate::Status image() {
+
+    static auto anim = hanim::FrameAnim();
+    static auto hobj = hanim::object::opengl::ImageView<500, 500>();
+    static bool init = true;
+
+    if (init) {
+        auto imageGenerator = [](int bufferWidth, int bufferHeight) {
+            std::vector<unsigned char> buffer(bufferWidth * bufferHeight * 4, 0);
+
+            static unsigned char rgba[] = { 0, 0, 0, 0 };
+
+            for (int y = 0; y < bufferHeight; ++y) {
+                for (int x = 0; x < bufferWidth; ++x) {
+                    int pixelIndex = (y * bufferWidth + x) * 4;
+                    buffer[pixelIndex + 0] = rgba[0];
+                    buffer[pixelIndex + 1] = rgba[1];
+                    buffer[pixelIndex + 2] = rgba[2];
+                    buffer[pixelIndex + 3] = rgba[3];
+                }
+                rgba[0] += 1;
+                rgba[1] += 2;
+                rgba[2] += 3;
+                rgba[3] += 4;
+            }
+
+            return buffer;
+        };
+
+        for (int i = 0; i < 500; i++) {
+            hanim::FAFrame frame(imageGenerator(500, 500), 500, 500, hanim::FAFrame::ColorType::RGBA);
+            anim.addFAFrame(frame);
+        }
+
+        anim.start();
+        anim.setFrameNums(500);
+
+        init = false;
+    }
+
+    hanim::HEngine::PlayFrame(anim, hobj);
+
+    return anim.status();
+
+}
+
 }
 }
 
