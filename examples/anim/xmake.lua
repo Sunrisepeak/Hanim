@@ -14,6 +14,17 @@ if is_plat("linux") then
     add_links("pthread")
 end
 
+--[[
+if is_plat("linux") then
+    add_includedirs("/usr/include/opencv4")
+    add_links("GL")
+    add_links("pthread")
+    add_links("opencv_core")
+    add_links("opencv_highgui")
+    add_links("opencv_imgproc", "opencv_videoio", "opencv_imgcodecs")
+end
+--]]
+
 target("hanim-demo-anim")
     set_kind("binary")
     add_packages("opencv", "glfw")
