@@ -205,13 +205,6 @@ struct IAFrame {
     }
 };
 
-struct RGBA {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
-};
-
 struct FAFrame {
 // type
     enum ColorType {
@@ -222,12 +215,12 @@ struct FAFrame {
     FAFrame(
         std::vector<unsigned char> data,
         unsigned int w, unsigned h,
-        ColorType _ctype = ColorType::RGBA
-    ) : ctype {_ctype }, width { w }, height { h } {
+        unsigned int _x = 0, unsigned _y = 0
+    ) : x { _x }, y { _y }, width { w }, height { h } {
         dataPtr = std::make_shared<std::vector<unsigned char>>(data);
     }
 // data
-    ColorType ctype;
+    unsigned int x, y;
     unsigned int width, height;
     std::shared_ptr<std::vector<unsigned char>> dataPtr;
 };
@@ -651,14 +644,32 @@ protected:
 // TODO: FrameAnim
 class FrameAnim : public HAnimate {
 public:
-    FrameAnim() : HAnimate(AType::FANIM) { }
+    enum FType {
+        RGB,
+        RGBA,
+    };
+
+    union Pixel {
+        struct {
+            unsigned char r, g, b;
+        } rgb;
+        struct {
+            unsigned char r, g, b, a;
+        } rgba;
+    };
+
+public:
+    FrameAnim(FType ftype = FType::RGBA) : HAnimate(AType::FANIM), __mFrameVec {} {
+        _mSubType = ftype;
+    }
+
 public:
     void addFAFrame(const FAFrame &frame) { __mFrameVec.push_back(frame); }
 protected:
     virtual Frame _nextFrame(float frameIndex) override {
         if (frameIndex >= _mFrameNums)
             return __mFrameVec.back();
-        auto realFrameIndex = frameIndex / _mFrameNums * __mFrameVec.size(); 
+        auto realFrameIndex = frameIndex / _mFrameNums * __mFrameVec.size();
         return __mFrameVec[realFrameIndex];
     }
 private:

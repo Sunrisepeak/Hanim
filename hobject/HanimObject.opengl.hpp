@@ -49,12 +49,6 @@ protected: // interface impl
 
 template <unsigned int W, unsigned int H>
 class ImageView : public hanim::HObject {
-
-public:
-    struct RGBA {
-        unsigned char r, g, b, a;
-    };
-
 public:
     ImageView() : __mBuff { 0 } { }
     ~ImageView() = default;
@@ -66,15 +60,13 @@ protected:
         printf("_frameHAnimate: %d, %d - %d, %d, %d\n", cnt++, type, frame.dataPtr->size(), frame.width, frame.height);
         */
 
-        if (type == -1) {
-            return;
-        }
-
-        for (int i = 0; i < frame.dataPtr->size(); i += 4) {
-            __mBuff[i / 4].r = (*(frame.dataPtr))[i + 0];
-            __mBuff[i / 4].g = (*(frame.dataPtr))[i + 1];
-            __mBuff[i / 4].b = (*(frame.dataPtr))[i + 2];
-            __mBuff[i / 4].a = (*(frame.dataPtr))[i + 3];
+        if (type == hanim::FrameAnim::RGBA) {
+            for (int i = 0; i < frame.dataPtr->size() && i / 4 < __mBuff.size(); i += 4) {
+                __mBuff[i / 4].rgba.r = (*(frame.dataPtr))[i + 0];
+                __mBuff[i / 4].rgba.g = (*(frame.dataPtr))[i + 1];
+                __mBuff[i / 4].rgba.b = (*(frame.dataPtr))[i + 2];
+                __mBuff[i / 4].rgba.a = (*(frame.dataPtr))[i + 3];
+            }
         }
 
     }
@@ -85,10 +77,10 @@ protected:
             for (int x = 0; x < W; x++) {
                 glBegin(GL_POINTS);
                     glColor4f(
-                        __mBuff[y * W + x].r / 255.f,
-                        __mBuff[y * W + x].g / 255.f,
-                        __mBuff[y * W + x].b / 255.f,
-                        __mBuff[y * W + x].a / 255.f
+                        __mBuff[y * W + x].rgba.r / 255.f,
+                        __mBuff[y * W + x].rgba.g / 255.f,
+                        __mBuff[y * W + x].rgba.b / 255.f,
+                        __mBuff[y * W + x].rgba.a / 255.f
                     );
                     glVertex2i(x, y);
                 glEnd();
@@ -96,8 +88,7 @@ protected:
         }
     }
 private:
-    //GLuint __mTextureID;
-    std::array<RGBA, W * H> __mBuff;
+    std::array<hanim::FrameAnim::Pixel, W * H> __mBuff;
 };
 
 } // opengl

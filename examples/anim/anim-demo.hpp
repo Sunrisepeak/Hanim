@@ -186,17 +186,17 @@ static hanim::HAnimate::Status image() {
                     buffer[pixelIndex + 2] = rgba[2];
                     buffer[pixelIndex + 3] = rgba[3];
                 }
-                rgba[0] += 1;
-                rgba[1] += 2;
-                rgba[2] += 3;
-                rgba[3] += 4;
+                rgba[0] += 1; rgba[1] += 2; rgba[2] += 3; rgba[3] += 4;
             }
 
             return buffer;
         };
 
         for (int i = 0; i < 500; i++) {
-            hanim::FAFrame frame(imageGenerator(500, 500), 500, 500, hanim::FAFrame::ColorType::RGBA);
+            hanim::FAFrame frame(
+                imageGenerator(500, 500),
+                500, 500
+            );
             anim.addFAFrame(frame);
         }
 
