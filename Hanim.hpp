@@ -26,6 +26,13 @@
 #define HANIM_VERIFY (0x68616e696d)
 #define HANIM_PI 3.14159265358979323846   // pi
 
+#define HANIM_CLONE(HAnimateType) \
+virtual std::shared_ptr<HAnimate> __clone() { \
+    auto anim = std::make_shared<HAnimateType>(); \
+    *anim = *this; \
+    return anim; \
+}
+
 // -----------------------------------------------HAnim: Frameworks / Engine -------------------------------------------------------
 
 namespace hanim {
@@ -230,6 +237,9 @@ using Frame = std::variant<IAFrame, FAFrame>;
 template<typename HType>
 static void __HEngineUnregister(HType *ptr);
 class HAnimate { // Animate Tree
+
+    HANIM_CLONE(HAnimate);
+
     friend class HEngine;
 public:
 
@@ -289,9 +299,9 @@ public: // big-five
         __mDirection = anim.__mDirection;
         __mEasingCurve = anim.__mEasingCurve;
 
-        // Anim Tree Data
-        for (auto ptr : anim.__mAnimVec) { // copy
-            __mAnimVec.push_back(std::make_shared<HAnimate>(*ptr));
+        // Anim Tree Data: need HANIM_CLONE to support -> __clone()
+        for (auto ptr : anim.__mAnimVec) {
+            __mAnimVec.push_back(ptr->__clone());
         }
         __mFrameTrackVec = anim.__mFrameTrackVec;
 
@@ -453,6 +463,9 @@ private: // HEngine data
 };
 
 class InterpolationAnim : public HAnimate {
+
+    HANIM_CLONE(InterpolationAnim);
+
 public:
     using PathFunc = std::function<float (float)>;
 
@@ -643,6 +656,9 @@ protected:
 
 // TODO: FrameAnim
 class FrameAnim : public HAnimate {
+
+    HANIM_CLONE(FrameAnim);
+
 public:
     enum FType {
         RGB,
