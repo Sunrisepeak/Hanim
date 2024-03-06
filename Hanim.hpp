@@ -462,9 +462,12 @@ private: // HEngine data
     std::vector<int> __mFrameTrackVec; // index for _mFrameNums(frame mainline)
 };
 
+class IAnimBase;
 class InterpolationAnim : public HAnimate {
 
     HANIM_CLONE(InterpolationAnim);
+
+    friend class IAnimBase;
 
 public:
     using PathFunc = std::function<float (float)>;
@@ -912,8 +915,6 @@ public: // spec-play
         }
     }
 
-public: // base-play interface for user
-
     static void Play(HAnimate &anim, HObject &hObj) {
         anim.start();
         _register(&anim, &hObj);
@@ -925,6 +926,16 @@ public: // base-play interface for user
         } else {
             hObj._render();
         }
+    }
+
+public: // base-play interface for user
+
+    static void PlayFrame(HAnimate &anim, HObject::IAnimCallBack iacb) {
+        HEngine::PlayFrame(anim, HObject(iacb));
+    }
+
+    static void PlayFrame(HAnimate &anim, HObject::FAnimCallBack facb) {
+        HEngine::PlayFrame(anim, HObject(facb));
     }
 
     static void PlayFrame(HAnimate &anim, HObject &&hObj) { PlayFrame(anim, hObj); }
@@ -1106,6 +1117,14 @@ private:
 
             anim.__mCurrentFrames += anim.__mDirection;
 
+        } else {
+            if (hObj.__mIAnimCB) {
+                hObj._interpolationHAnimate(-1 /*subType*/, std::get<IAFrame>(anim._nextFrame(anim._mFrameNums)));
+            }
+
+            if (hObj.__mFAnimCB) {
+                hObj._frameHAnimate(-1 /*subType*/, std::get<FAFrame>(anim._nextFrame(anim._mFrameNums)));
+            }
         }
 
         hObj._syncData(); // sync anim data
@@ -1209,6 +1228,75 @@ static InterpolationAnim path(const std::vector<IAFrame> &keyFrameVec, unsigned 
     anim.start();
     return anim;
 }
+
+// easy to use
+
+#define HPlay(anim, hobj) \
+{ \
+    static auto __anim = anim; \
+    __anim(hobj); \
+}
+
+class IAnimBase {
+
+public:
+    struct Config {
+        HAnimate::PlayType playType = HAnimate::PlayType::OneShot;
+        unsigned int frameNums = 60;    
+    };
+
+public:
+    IAnimBase(Config config) {
+        _mIAnim.setPlayType(config.playType);
+        _mIAnim.setFrameNums(config.frameNums);
+    }
+
+public:
+    HAnimate & operator()(HObject &hobj) {
+        HEngine::PlayFrame(_mIAnim, hobj);
+    }
+
+    HAnimate & operator()(HObject::IAnimCallBack iacb) {
+        HEngine::PlayFrame(_mIAnim, HObject(iacb));
+    }
+
+    HAnimate & operator()(HObject::FAnimCallBack facb) {
+        HEngine::PlayFrame(_mIAnim, HObject(facb));
+    }
+
+public:
+/*
+    using _T = InterpolationAnim &;
+    operator _T() {
+        return _mIAnim;
+    }
+*/
+    InterpolationAnim & _instance() {
+        return _mIAnim;
+    }
+
+protected:
+    InterpolationAnim _mIAnim;
+};
+
+struct Move : public IAnimBase {
+    Move(float x1, float y1, float x2, float y2, Config config = Config()) : IAnimBase(config) {
+        // config
+        _mIAnim.setStartFrame({x1, y1});
+        _mIAnim.setEndFrame({x2, y2});
+        _mIAnim.start();
+
+    }
+};
+
+struct Scale : public IAnimBase {
+    Scale(float width1, float height1, float width2, float height2, Config config = Config()) : IAnimBase(config) {
+        // config
+        _mIAnim.setStartFrame({width1, height1});
+        _mIAnim.setEndFrame({width2, height2});
+        _mIAnim.start();
+    }
+};
 
 }
 
