@@ -86,7 +86,79 @@ int main() {
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowMinSize = ImVec2(300, 300);
 
-        hanim::demo::imgui();
+        //hanim::demo::imgui();
+
+    ImGui::Begin("elloSFSDFSF");
+    static auto scale = hanim::Scale(100, 100, 280, 280, {.playType = hanim::HAnimate::PlayType::RT});
+    scale(
+        [ & ](int type, const hanim::IAFrame &frame) {
+            printf("%f %f\n", frame.data[0], frame.data[1]);
+            ImGui::Button("Scale", {frame.data[0], frame.data[1]});
+        }
+    );
+    ImGui::End();
+
+    ImGui::Begin("HelloSFSDFSF");
+    static auto move = hanim::Move(100, 100, 300, 100, {
+        .playType = hanim::HAnimate::PlayType::RT,
+        .frameNums = 120
+    });
+    move(
+        [ & ](int type, const hanim::IAFrame &frame) {
+            ImGui::SetCursorPosX(frame.data[0]);
+            ImGui::SetCursorPosY(frame.data[1]);
+            printf("%f %f\n", frame.data[0], frame.data[1]);
+            ImGui::Button("Move 1");
+        }
+    );
+
+    static auto move2 = hanim::Move(100, 150, 300, 150, {
+        .playType = hanim::HAnimate::PlayType::RT,
+        .frameNums = 60
+    });
+    move2(
+        [ & ](int type, const hanim::IAFrame &frame) {
+            ImGui::SetCursorPosX(frame.data[0]);
+            ImGui::SetCursorPosY(frame.data[1]);
+            printf("%f %f\n", frame.data[0], frame.data[1]);
+            ImGui::Button("Move 2");
+        }
+    );
+
+/*
+    [](hanim::InterpolationAnim &anim) {
+        anim.setEasingCurve(hanim::EasingCurve::ECType::IN_SIN);
+    }(move2);
+*/
+    move2._instance().setEasingCurve(hanim::EasingCurve::ECType::IN_SIN);
+
+    HPlay(
+        hanim::Move(100, 200, 300, 200, {
+            .playType = hanim::HAnimate::PlayType::RT,
+            .frameNums = 90
+        }),
+        [ & ](int type, const hanim::IAFrame &frame) {
+            ImGui::SetCursorPosX(frame.data[0]);
+            ImGui::SetCursorPosY(frame.data[1]);
+            printf("%f %f\n", frame.data[0], frame.data[1]);
+            ImGui::Button("Move 3");
+        }
+    )
+
+    HPlay(
+        hanim::Move(100, 250, 300, 250, {
+            .playType = hanim::HAnimate::PlayType::RT,
+            .frameNums = 30
+        }),
+        [ & ](int type, const hanim::IAFrame &frame) {
+            ImGui::SetCursorPosX(frame.data[0]);
+            ImGui::SetCursorPosY(frame.data[1]);
+            printf("%f %f\n", frame.data[0], frame.data[1]);
+            ImGui::Button("Move 4");
+        }
+    )
+
+    ImGui::End();
 
         // Rendering
         ImGui::Render();
