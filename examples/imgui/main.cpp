@@ -20,9 +20,7 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-// Hanim
-#include <Hanim.hpp>
-#include <himgui.hpp>
+#include <HanimDemo.hpp>
 
 #ifdef HANIM_ENABLE_XRECORDER_OPENGL
 #include <XRecorder/OpenGLRecorder.hpp>
@@ -57,7 +55,7 @@ int main() {
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "HAnim: Demo", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Hello Hanim", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -72,8 +70,6 @@ int main() {
 
     ImVec4 clear_color = ImVec4(0.4f, 0.5f, 0.6f, 1.00f);
 
-    hanim::demo::init();
-
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -86,7 +82,7 @@ int main() {
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowMinSize = ImVec2(300, 300);
 
-        hanim::demo::imgui();
+        hanim::demo_render();
 
         // Rendering
         ImGui::Render();
@@ -98,7 +94,7 @@ int main() {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     #ifdef HANIM_ENABLE_XRECORDER_OPENGL
-  static xrecorder::OpenGLRecorder<1920,1080> xr("hanim-demo-imgui");
+        static xrecorder::OpenGLRecorder<1920,1080> xr("hanim-demo-imgui");
         xr.captureFrameData();
         xr.saveToVideo();
         //xr.saveToImg();
