@@ -37,5 +37,4 @@ Hanim是一个轻量级的动画框架.
 
 ---
 
-[文档仓库](https://github.com/Sunrisepeak/hanim-docs)
-[在线文档](https://speaks-organization.gitbook.io/hanim+imgui-dong-hua-kong-jian-she-ji/)
+[文档仓库](https://github.com/Sunrisepeak/hanim-docs) | [在线文档](https://speaks-organization.gitbook.io/hanim+imgui-dong-hua-kong-jian-she-ji/)
