@@ -1,0 +1,1 @@
+该文件夹之用来存少量资源文件, 相关文档已移动到[文档仓库](https://github.com/Sunrisepeak/hanim-docs)
