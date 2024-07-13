@@ -31,7 +31,12 @@
 *.out
 *.app
 
-# Other
+# python
+**__pycache__
+
+# vscode
 .vscode
+
+# xmake
 .xmake
 build
