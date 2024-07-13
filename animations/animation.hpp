@@ -24,7 +24,7 @@ private: \
 //PropertyAnimateTemplate(Shift, shift, vec3, vec3(1, 0, 0))
 PropertyAnimateTemplate(Scale, scale, float, 2)
 PropertyAnimateTemplate(Rotate, rotate, float, 90)
-PropertyAnimateTemplate(Opacity, opacity, float, 1)
+//PropertyAnimateTemplate(Opacity, opacity, float, 1)
 PropertyAnimateTemplate(Thickness, thickness, float, 1)
 //PropertyAnimateTemplate(Color, color, vec4, vec4(1, 0, 0, 0.5))
 
@@ -49,6 +49,33 @@ public:
     }
 private:
     vec3 mValue;
+};
+
+class Opacity : public HAnimate {
+public:
+    Opacity(HObject &obj, float value = 1.0)
+        : HAnimate(obj), mValue { value } { }
+    void preprocess() override {
+        mTargetHObject = mStartHObject = mRenderHObject;
+        mStartHObject.opacity(mValue);
+    }
+    void process(int currentFrame) override {
+        float alpha = 1.0 * currentFrame / mFrameNumber;
+        auto targetOpacity = Interpolator::value(
+            mStartHObject.get_opacity(),
+            mTargetHObject.get_opacity(),
+            alpha
+        );
+        auto targetFillOpacity = Interpolator::value(
+            mStartHObject.get_fill_opacity(),
+            mTargetHObject.get_fill_opacity(),
+            alpha
+        );
+        mRenderHObject.opacity(targetOpacity, false);
+        mRenderHObject.fill_opacity(targetFillOpacity);
+    }
+private:
+    float mValue;
 };
 
 }
