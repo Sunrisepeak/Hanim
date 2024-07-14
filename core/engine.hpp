@@ -95,6 +95,10 @@ public: // recorder
         _config().rLossless = enable;
     }
 
+    static void recorder_repeat_write(int frameNumber = 60) {
+        Instance().mRecorder.repeat_write(frameNumber);
+    }
+
     static void save_frame_to_img(std::string name) {
         Instance().mRecorder.save_frame_to_img(name);
     }

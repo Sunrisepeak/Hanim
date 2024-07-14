@@ -90,6 +90,16 @@ public: // control
         mVWriter << cv_pixels;
     }
 
+    void repeat_write(int frameNumber) {
+        if (mVWriter.isOpened()) {
+            cv::Mat cv_pixels;
+            cv::cvtColor(mPixels, cv_pixels, cv::COLOR_RGBA2BGR);
+            for (int i = 0; i < frameNumber; i++) {
+                mVWriter << cv_pixels;
+            }
+        }
+    }
+
     void stop() {
         if (mVWriter.isOpened()) {
             HONLY_LOGP("save to video-%dx%d-%d-%s...",

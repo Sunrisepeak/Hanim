@@ -11,6 +11,8 @@ struct Grid : hanim::HObject {
     Grid(float w = 2, float h = 2, float interval = 0.5) {
         mData->componentMode = true;
 
+        w = w / 2; h = h / 2;
+
         add(Line({-w, 0, 0}, {w, 0, 0}).color({1, 0, 0, 1}));
         add(Line({0, -h, 0}, {0, h, 0}).color({0, 1, 0, 1}));
 

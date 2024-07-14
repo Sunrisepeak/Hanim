@@ -176,11 +176,16 @@ public: // get
 public: // get
 
     vec3 get_center() const {
+        //compute_center(); TODO: update?
         return mData->center;
     }
 
     DrawMode get_draw_mode() const {
         return mData->drawMode;
+    }
+
+    const Color & get_color() const {
+        return mData->rgbs[0];
     }
 
     const Color & get_fill_color() const {
@@ -436,6 +441,7 @@ private:
             vec3 v(0);
             if (isComponents()) {
                 for (auto &obj : mData->components) {
+                    obj.compute_center(); // update sub-obj center
                     for (auto &p : obj.mData->points) {
                         v += p;
                         pointsSize++;
@@ -486,6 +492,27 @@ private: // static
     }
 
 public: // component
+    // TODO: dont to modify subObj + const ? - center re-compute?
+    // center compute issue?
+    //    1. auto update
+    //    2. lazy compute
+    //    3. explicity compute
+    HObject & operator[](int index) {
+        if (false == mData->componentMode) {
+            return *this;
+        }
+        if (index < 0) {
+            index += mData->components.size();
+        }
+        if (index < 0 || index >= mData->components.size()) {
+            HONLY_LOGE("index out range - %d(%ld)",
+                index,
+                mData->components.size()
+            );
+        }
+        return mData->components[index];
+    }
+
     HObject & add(HObject obj) {
         if (false == mData->componentMode) {
             this->covert_to_components();

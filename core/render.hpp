@@ -38,6 +38,10 @@ public: // render
 
         // TODO: optimize - batch render
         for (auto obj : objs) {
+            if (obj->get_opacity() == 0 && obj->get_fill_opacity() == 0) {
+                continue;
+            }
+
             auto dataPtr = obj->_get_data();
             data.vertexNums = dataPtr->points.size();
             data.vertices = (float *) dataPtr->points.data();
@@ -82,6 +86,10 @@ public: // render
             glfwSwapBuffers(Instance().mWindow);
         }
         glfwPollEvents();
+        call_buff_handler();
+    }
+
+    static void call_buff_handler() {
         if (nullptr != Instance().mBuffHandler) {
             static std::vector<unsigned char> buff;
             read_buff(buff);

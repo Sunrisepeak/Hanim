@@ -55,6 +55,10 @@ struct Interpolator {
                 obj1.mData->center, obj2.mData->center,
                 alpha
             );
+            obj.mData->thickness = Interpolator::value(
+                obj1.mData->thickness, obj2.mData->thickness,
+                alpha
+            );
         }
         return obj;
     }

@@ -35,7 +35,7 @@ virtual std::shared_ptr<HAnimate> __clone() { \
 }
 
 
-namespace hanim {
+namespace hanim_framework {
 
 // ----------------------------------------------- Type Define -------------------------------------------------------
 

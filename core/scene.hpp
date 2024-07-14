@@ -19,7 +19,7 @@ class Scene {
         std::shared_ptr<hanim::HObject> objPtr;
     };
 
-public:
+protected:
     virtual void timeline() { /* impl by sub-class */  };
 
 public:
@@ -83,12 +83,22 @@ protected:
         }
     }
 
+    // TODO: optimize logic wait
+    void wait(int frameNumber = 60) {
+        Render::start();
+        static_render();
+        Render::end();
+        for (int i = 1; i < frameNumber; i++) {
+            Render::call_buff_handler();
+        }
+    }
+
+private:
+
     int mTimeline;
     std::list<StaticObj> mStaticObjs; // static cobj
     std::vector<std::shared_ptr<hanim::HAnimate>> mCAnimates;
     std::vector<std::vector<HObject>> mFrameBuffVec; // TODO: optimize
-
-protected:
 
     void play_internal(hanim::HAnimate *anim, int frameNumber = 60) {
         auto animPtr = std::shared_ptr<hanim::HAnimate>(anim);
@@ -109,7 +119,7 @@ protected:
 
             Render::start();
 
-            static_render(mTimeline);
+            static_render();
 
             // render dynamic obj
             animPtr->update(i); // update aniamte data
@@ -127,7 +137,7 @@ protected:
         }
     }
 
-    void static_render(int currentFrameNumber) {
+    void static_render() {
         // render static obj
         // TODO: optimize - use framebuff replace
         for (auto it = mStaticObjs.begin(); it != mStaticObjs.end();) {
@@ -145,6 +155,7 @@ protected:
     }
 
     void render_target_frame(int frame) {
+        // TODO: mFrameBuffVec only save have rendered obj
         if (frame > mFrameBuffVec.size() - 1) {
             frame = mFrameBuffVec.size() - 1;
         }

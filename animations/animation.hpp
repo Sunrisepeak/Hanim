@@ -57,7 +57,7 @@ public:
         : HAnimate(obj), mValue { value } { }
     void preprocess() override {
         mTargetHObject = mStartHObject = mRenderHObject;
-        mStartHObject.opacity(mValue);
+        mTargetHObject.opacity(mValue);
     }
     void process(int currentFrame) override {
         float alpha = 1.0 * currentFrame / mFrameNumber;
@@ -76,6 +76,69 @@ public:
     }
 private:
     float mValue;
+};
+
+class ColorUpdate : public HAnimate {
+public:
+    ColorUpdate(HObject &obj, Color value = {1, 1, 1, 1})
+        : HAnimate(obj), mValue { value } { }
+    void preprocess() override {
+        mTargetHObject = mStartHObject = mRenderHObject;
+        mTargetHObject.color(mValue);
+    }
+    void process(int currentFrame) override {
+        float alpha = 1.0 * currentFrame / mFrameNumber;
+        auto color = Interpolator::value(
+            mStartHObject.get_color(),
+            mTargetHObject.get_color(),
+            alpha
+        );
+        mRenderHObject.color(color);
+    }
+private:
+    Color mValue;
+};
+
+class FillColor : public HAnimate {
+public:
+    FillColor(HObject &obj, Color value = {1, 1, 1, 1})
+        : HAnimate(obj), mValue { value } { }
+    void preprocess() override {
+        mTargetHObject = mStartHObject = mRenderHObject;
+        mTargetHObject.fill_color(mValue);
+    }
+    void process(int currentFrame) override {
+        float alpha = 1.0 * currentFrame / mFrameNumber;
+        auto color = Interpolator::value(
+            mStartHObject.get_fill_color(),
+            mTargetHObject.get_fill_color(),
+            alpha
+        );
+        mRenderHObject.fill_color(color);
+    }
+private:
+    Color mValue;
+};
+
+class MoveTo : public HAnimate {
+public:
+    MoveTo(HObject &obj, vec3 value = vec3(0))
+        : HAnimate(obj), mValue { value } { }
+    void preprocess() override {
+        mTargetHObject = mStartHObject = mRenderHObject;
+        mTargetHObject.move_to(mValue);
+    }
+    void process(int currentFrame) override {
+        float alpha = 1.0 * currentFrame / mFrameNumber;
+        auto pos = Interpolator::value(
+            mStartHObject.get_center(),
+            mTargetHObject.get_center(),
+            alpha
+        );
+        mRenderHObject.move_to(pos);
+    }
+private:
+    vec3 mValue;
 };
 
 }

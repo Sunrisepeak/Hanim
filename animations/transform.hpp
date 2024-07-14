@@ -7,11 +7,12 @@ namespace hanim {
 
 class Transform : public hanim::HAnimate {
 public:
-    Transform(hanim::HObject &obj, hanim::HObject &target) : HAnimate(obj) {
+    Transform(hanim::HObject &obj, hanim::HObject &target, bool useTargetObj = false) : HAnimate(obj) {
         mTarget.ref(target);
+        mUseTargetObj = useTargetObj;
     }
 
-    Transform(hanim::HObject &&obj, hanim::HObject &target) : Transform(obj, target) {
+    Transform(hanim::HObject &&obj, hanim::HObject &target, bool useTargetObj = false) : Transform(obj, target, useTargetObj) {
 
     }
 
@@ -42,10 +43,16 @@ public:
     }
 
     virtual void postprocess() override {
-        mTargetHObject = std::move(mTarget);
-        mRenderHObject = mTargetHObject; // copy
+        if (mUseTargetObj) {
+            mRenderHObject.ref(mTarget);
+        } else {
+            mTargetHObject = std::move(mTarget);
+            mRenderHObject = mTargetHObject; // copy
+        }
     }
 
+protected:
+    bool mUseTargetObj;
     hanim::HObject mTarget;
 };
 
