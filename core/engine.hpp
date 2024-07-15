@@ -1,10 +1,9 @@
 #ifndef HENGINE_HPP_HANIM
 #define HENGINE_HPP_HANIM
 
+#include <string>
 #include <thread>
 #include <chrono>
-#include <iomanip>
-#include <ctime>
 
 #include <third-party/third_party_header.hpp>
 
@@ -14,17 +13,6 @@
 #include "core/recorder.hpp"
 
 namespace hanim {
-
-std::string get_current_date() {
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_t = std::chrono::system_clock::to_time_t(now);
-    std::tm now_tm = *std::localtime(&now_t);
-
-    // YY-MM-DD
-    std::ostringstream oss;
-    oss << std::put_time(&now_tm, "%y-%m-%d");
-    return oss.str();
-}
 
 class HEngine {
 
@@ -95,6 +83,10 @@ public: // recorder
         _config().rLossless = enable;
     }
 
+    static void recorder_file_name(std::string name) {
+        _config().rName = name;
+    }
+
     static void recorder_repeat_write(int frameNumber = 60) {
         Instance().mRecorder.repeat_write(frameNumber);
     }
@@ -132,7 +124,7 @@ private:
 
         if (_config().recorder) {
             HONLY_LOGP("init recorder...");
-            mRecorder.set_name("hanim_" + get_current_date())
+            mRecorder.set_name(_config().rName)
                 .set_fps(_config().rFps)
                 .set_size(_config().wWidth, _config().wHeight)
                 .set_lossless(_config().rLossless)
@@ -168,13 +160,14 @@ private:
         bool recorder;
         int rFps;
         bool rLossless;
+        std::string rName;
         std::chrono::time_point<std::chrono::steady_clock> start_time;
     };
 
     static Config & _config() {
         static Config config {
             true, 854, 480, // window
-            false, 60, false // recorder
+            false, 60, false, "hanim"// recorder
             // stime,
         };
         return config;

@@ -28,10 +28,10 @@ struct PixelsScene : public Scene {
     void start_anim() {
         auto rect = Rectangle()
             .shift({-3, 0, 0})
-            .thickness(2)
+            .thickness(5)
             .scale(2);
         auto circle = Circle()
-            .thickness(2)
+            .thickness(5)
             .shift({3, 0, 0})
             .color({0, 1, 0, 1})
             .opacity(0.5);
@@ -40,10 +40,11 @@ struct PixelsScene : public Scene {
         play(Opacity(rect, 0));
     }
 
-    void pixel_logo_anim(HObject &hobj){
+    void pixel_logo_anim(HObject &hobj, int changeFrameNumber = 10, float x = 0, float y = 0){
 
         auto pixel = Rectangle()
-            .thickness(2)
+            .shift({x, y, 0})
+            .thickness(3)
             .color({0, 1, 1, 1})
             .fill_color({0.2, 0.2, 0.2, 0.2});
 
@@ -77,7 +78,7 @@ struct PixelsScene : public Scene {
 
         play(pixelOutAnim);
 
-        auto box = Rectangle().color({1, 0, 0, 1}).thickness(2);
+        auto box = Rectangle().color({1, 0, 0, 1}).thickness(3);
         add(box);
         for (int i = 0; i < 4 * 4; i++) {
             int index = i % 4; // R0 G1 B2 A3
@@ -87,7 +88,7 @@ struct PixelsScene : public Scene {
             pixelColor[index] = subPixelColor[index] = subPixelColor[index] + 0.2;
             pixels[index].fill_color(subPixelColor);
             pixel.fill_color(pixelColor);
-            wait(8);
+            wait(changeFrameNumber);
         }
         box.opacity(0);
 
@@ -97,29 +98,30 @@ struct PixelsScene : public Scene {
         for (auto &p : pixels) {
             pixelInAnim.add(Transform(p, pixel));
         }
+
         play(pixelInAnim);
 
         auto fadeOut = HAnimGroup(Opacity(pixel, 0));
         for (auto &p : pixels) {
             fadeOut.add(Opacity(p, 0));
         }
-        play(fadeOut);
+        play(fadeOut, 90);
     }
 
     virtual void timeline() override {
 
         start_anim();
 
-        wait();
+        //wait();
 
         auto pixel = Rectangle()
-            .thickness(2)
+            .thickness(3)
             .color({0, 1, 1, 1})
             .fill_color({0.5, 0.5, 0.5, 1});
 
         play(Create(pixel));
 
-        wait();
+        //wait();
 
         // 1.Gray
         HObject grayVals;
@@ -135,10 +137,10 @@ struct PixelsScene : public Scene {
         }
         play(Transform(pixel.clone().color({0, 0, 0, 0}), grayVals, true));
 
-        wait();
+        //wait();
 
         auto selectionBox = Rectangle().color({1, 1, 0, 1});
-        selectionBox.thickness(2);
+        selectionBox.thickness(3);
         selectionBox.move_to(grayVals[5].get_center());
 
         play(HAnimGroup(
@@ -146,17 +148,23 @@ struct PixelsScene : public Scene {
             MoveTo(selectionBox, grayVals[8].get_center())
         ));
 
-        wait();
+        //wait();
 
         play(HAnimGroup(
             FillColor(pixel, {0.2, 0.2, 0.2, 1}),
             MoveTo(selectionBox, grayVals[2].get_center())
         ));
 
+        //wait();
+
+        // GrayPicture
         auto pixelGrid = Grid(4, 4, 0.25);
         pixelGrid.shift({4, 2, 0});
         play(Transform(pixel.clone(), pixelGrid, true));
 
+        //wait();
+
+        // draw-ikArtist
         auto ikGrayPicture = HObject();
         for (int i = 0; i < 16 * 16; i++) {
             int x = i / 16;
@@ -170,7 +178,7 @@ struct PixelsScene : public Scene {
         ikGrayPicture.rotate(-90);
         play(DrawBorder(ikGrayPicture));
 
-        wait();
+        //wait();
 
         pixelGrid.opacity(0);
         selectionBox.opacity(0);
@@ -181,6 +189,8 @@ struct PixelsScene : public Scene {
         ));
         ikGrayPicture.opacity(0);
         grayVals.opacity(0);
+
+        //wait();
 
         // 2.RGB
         pixel.fill_color({0.5, 0.5, 0.5, 1});
@@ -207,6 +217,8 @@ struct PixelsScene : public Scene {
 
         play(Transform(pixel.clone(), pixels, true));
 
+        //wait();
+
         for (int i = 0; i < 11; i++) {
             Color c = {0, 0.1 * i, 0, 1};
             colorSlider[i].color({0, 0, 0, 0}).fill_color(c);
@@ -221,17 +233,21 @@ struct PixelsScene : public Scene {
             Transform(pixels[1].clone().opacity(1), selectionBox, true)
         ));
 
+        //wait();
+
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 1);
         }
+
+        //wait();
 
         for (int i = 9; i >= 7; i--) {
             play(Shift(selectionBox, {-1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 1);
         }
 
-        wait();
+        //wait();
 
         pixels[1].opacity(1);
         selectionBox.opacity(0);
@@ -256,6 +272,8 @@ struct PixelsScene : public Scene {
             Transform(pixels[0].clone().opacity(1), selectionBox, true)
         );
 
+        //wait();
+
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 0);
@@ -266,7 +284,7 @@ struct PixelsScene : public Scene {
             color_sync(pixel, pixels, colorSlider, i, 0);
         }
 
-        wait();
+        //wait();
 
         pixels[0].opacity(1);
         selectionBox.opacity(0);
@@ -284,6 +302,8 @@ struct PixelsScene : public Scene {
             Transform(pixels[2].clone().opacity(1), selectionBox, true)
         );
 
+        //wait();
+
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 2);
@@ -294,21 +314,76 @@ struct PixelsScene : public Scene {
             color_sync(pixel, pixels, colorSlider, i, 2);
         }
 
-        wait();
+        //wait();
 
-        //pixel_logo_anim(circle);
+        pixels[2].opacity(1);
+        selectionBox.opacity(0);
+
+        // A - Alpha
+
+        auto tmpAlpha = pixels[3].clone();
+        play(Transform(pixel.clone(), tmpAlpha.opacity(1), true));
+        tmpAlpha.opacity(0);
+        pixels[3].opacity(1);
+
+        //wait();
+
+        play(Rotate(pixels, -90));
+        init_color_slider(colorSlider, 3);
+        pixels[3].opacity(0);
+        selectionBox = selectionBox.clone();
+        selectionBox.move_to(colorSlider[10].get_center());
+        selectionBox.color({1, 1, 0, 1});
+        play(
+            Transform(pixels[3].clone().opacity(1), selectionBox, true)
+        );
+
+        //wait();
+
+        for (int i = 10; i > 0; i--) {
+            play(MoveTo(selectionBox, colorSlider[i].get_center()), 10);
+            color_sync(pixel, pixels, colorSlider, i, 3);
+        }
+
+        for (int i = 1; i < 5; i++) {
+            play(MoveTo(selectionBox, colorSlider[i].get_center()), 10);
+            color_sync(pixel, pixels, colorSlider, i, 3);
+        }
+
+        //wait();
+
+        tmpAlpha = pixels[3].clone();
+        tmpAlpha.opacity(1);
+        tmpAlpha.fill_color(colorSlider[4].get_fill_color());
+        play(HAnimGroup(
+            Transform(colorSlider, tmpAlpha),
+            Transform(selectionBox, tmpAlpha)
+        ));
+        pixels[3] = tmpAlpha;
+        tmpAlpha.opacity(0);
+        selectionBox.opacity(0);
+        colorSlider.opacity(0);
+
+        //wait();
+
+        pixel_logo_anim(pixels);
     }
 
     void color_sync(HObject &pixel, HObject &pixels, HObject &colorSlider, int index, int channel) {
         auto subColor = pixels[channel].get_fill_color();
         auto color = pixel.get_fill_color();
         color[channel] = subColor[channel] = colorSlider[index].get_fill_color()[channel];
-        pixels[channel].fill_color(subColor);
+        if (channel != 3) pixels[channel].fill_color(subColor);
         pixel.fill_color(color);
     }
 
     void init_color_slider(HObject &colorSlider, int channel) {
-        Color color {0, 0, 0, 1};
+        Color color;
+        if (channel == 3) {
+            color = Color{1, 1, 1, 0};
+        } else {
+            color = Color{0, 0, 0, 1};
+        }
         for (int i = 0; i < 11; i++) {
             color[channel] = 0.1 * i;
             colorSlider[i].fill_color(color);
@@ -319,6 +394,8 @@ struct PixelsScene : public Scene {
 
 int main() {
     hanim::HEngine::default_config1();
+    //hanim::HEngine::default_config2();
+    hanim::HEngine::recorder_file_name("hello-pixels");
     hanim::HEngine::render(PixelsScene());
     return 0;
 }

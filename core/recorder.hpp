@@ -6,6 +6,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "utils/utils.hpp"
+
 namespace hanim {
 
 class Recorder {
@@ -65,11 +67,17 @@ public: // control
             mFPS = 60;
         }
 
+        auto fileName = mName + "_" + get_current_date() + "_" +
+            std::to_string(mWidth) + "x" + std::to_string(mHeight) + "_" +
+            std::to_string(mFPS) + std::string("_") +
+            (mLoseless ? "lossless" : "compressed") +
+            std::string(".ha");
+
         mVWriter.open(
-            (mName + (mLoseless ? ".mkv" : ".mp4")).c_str(),
+            (fileName + (mLoseless ? ".mkv" : ".mp4")).c_str(),
             mLoseless ? cv::VideoWriter::fourcc('H', 'F', 'Y', 'U') : // Huffman / mkv
             cv::VideoWriter::fourcc('a', 'v', 'c', '1'), // 43K H.264 / mp4
-            //cv::VideoWriter::fourcc('H', '2', '6', '4'), 
+            //cv::VideoWriter::fourcc('H', '2', '6', '4'),
             //cv::VideoWriter::fourcc('X', 'V', 'I', 'D'),
             //cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // 300K
             mFPS,
