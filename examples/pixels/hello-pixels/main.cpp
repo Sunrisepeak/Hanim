@@ -2,6 +2,13 @@
 
 #include "hanim.h"
 
+/*
+base-on:
+    date: 2024/7/15
+    os: ubuntu22.04
+    commit-id: 6089136e6566245227a8cd7b75974829a71ea998
+*/
+
 using namespace hanim;
 
 static std::vector<std::vector<float>> ikArtistMap {
