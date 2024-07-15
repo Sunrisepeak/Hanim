@@ -7,9 +7,20 @@ base-on:
     date: 2024/7/15
     os: ubuntu22.04
     commit-id: 6089136e6566245227a8cd7b75974829a71ea998
+
+// Bug: DrawBorder for Rect when 30fps
+
+video: https://github.com/user-attachments/assets/4a4d9aa0-8e95-4018-a899-1dfc7a0e0ba4
+
 */
 
 using namespace hanim;
+
+const static int THICKNESS_240P = 1;
+const static int THICKNESS_480P = 2;
+const static int THICKNESS_1080P = 4;
+
+const static int THICKNESS =  THICKNESS_480P; // THICKNESS_1080P;
 
 static std::vector<std::vector<float>> ikArtistMap {
     { 8, 8, 8, 8, 8, 8, 8, 7, 6, 6, 8, 8, 8, 8, 8, 8 },
@@ -31,14 +42,14 @@ static std::vector<std::vector<float>> ikArtistMap {
     { 8, 8, 2, 2, 2, 8, 8, 8, 8, 8, 2, 2, 2, 8, 8, 8 }
 };
 
-struct PixelsScene : public Scene {
+struct HelloPixels : public Scene {
     void start_anim() {
         auto rect = Rectangle()
             .shift({-3, 0, 0})
-            .thickness(5)
+            .thickness(THICKNESS)
             .scale(2);
         auto circle = Circle()
-            .thickness(5)
+            .thickness(THICKNESS)
             .shift({3, 0, 0})
             .color({0, 1, 0, 1})
             .opacity(0.5);
@@ -51,7 +62,7 @@ struct PixelsScene : public Scene {
 
         auto pixel = Rectangle()
             .shift({x, y, 0})
-            .thickness(3)
+            .thickness(THICKNESS)
             .color({0, 1, 1, 1})
             .fill_color({0.2, 0.2, 0.2, 0.2});
 
@@ -85,7 +96,7 @@ struct PixelsScene : public Scene {
 
         play(pixelOutAnim);
 
-        auto box = Rectangle().color({1, 0, 0, 1}).thickness(3);
+        auto box = Rectangle().color({1, 0, 0, 1}).thickness(THICKNESS);
         add(box);
         for (int i = 0; i < 4 * 4; i++) {
             int index = i % 4; // R0 G1 B2 A3
@@ -119,16 +130,16 @@ struct PixelsScene : public Scene {
 
         start_anim();
 
-        //wait();
+        wait();
 
         auto pixel = Rectangle()
-            .thickness(3)
+            .thickness(THICKNESS)
             .color({0, 1, 1, 1})
             .fill_color({0.5, 0.5, 0.5, 1});
 
         play(Create(pixel));
 
-        //wait();
+        wait();
 
         // 1.Gray
         HObject grayVals;
@@ -144,10 +155,10 @@ struct PixelsScene : public Scene {
         }
         play(Transform(pixel.clone().color({0, 0, 0, 0}), grayVals, true));
 
-        //wait();
+        wait();
 
         auto selectionBox = Rectangle().color({1, 1, 0, 1});
-        selectionBox.thickness(3);
+        selectionBox.thickness(THICKNESS);
         selectionBox.move_to(grayVals[5].get_center());
 
         play(HAnimGroup(
@@ -155,21 +166,21 @@ struct PixelsScene : public Scene {
             MoveTo(selectionBox, grayVals[8].get_center())
         ));
 
-        //wait();
+        wait();
 
         play(HAnimGroup(
             FillColor(pixel, {0.2, 0.2, 0.2, 1}),
             MoveTo(selectionBox, grayVals[2].get_center())
         ));
 
-        //wait();
+        wait();
 
         // GrayPicture
         auto pixelGrid = Grid(4, 4, 0.25);
         pixelGrid.shift({4, 2, 0});
         play(Transform(pixel.clone(), pixelGrid, true));
 
-        //wait();
+        wait();
 
         // draw-ikArtist
         auto ikGrayPicture = HObject();
@@ -185,7 +196,7 @@ struct PixelsScene : public Scene {
         ikGrayPicture.rotate(-90);
         play(DrawBorder(ikGrayPicture));
 
-        //wait();
+        wait();
 
         pixelGrid.opacity(0);
         selectionBox.opacity(0);
@@ -197,7 +208,7 @@ struct PixelsScene : public Scene {
         ikGrayPicture.opacity(0);
         grayVals.opacity(0);
 
-        //wait();
+        wait();
 
         // 2.RGB
         pixel.fill_color({0.5, 0.5, 0.5, 1});
@@ -224,7 +235,7 @@ struct PixelsScene : public Scene {
 
         play(Transform(pixel.clone(), pixels, true));
 
-        //wait();
+        wait();
 
         for (int i = 0; i < 11; i++) {
             Color c = {0, 0.1 * i, 0, 1};
@@ -240,21 +251,21 @@ struct PixelsScene : public Scene {
             Transform(pixels[1].clone().opacity(1), selectionBox, true)
         ));
 
-        //wait();
+        wait();
 
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 1);
         }
 
-        //wait();
+        wait();
 
         for (int i = 9; i >= 7; i--) {
             play(Shift(selectionBox, {-1, 0, 0}), 10);
             color_sync(pixel, pixels, colorSlider, i, 1);
         }
 
-        //wait();
+        wait();
 
         pixels[1].opacity(1);
         selectionBox.opacity(0);
@@ -279,7 +290,7 @@ struct PixelsScene : public Scene {
             Transform(pixels[0].clone().opacity(1), selectionBox, true)
         );
 
-        //wait();
+        wait();
 
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
@@ -291,7 +302,7 @@ struct PixelsScene : public Scene {
             color_sync(pixel, pixels, colorSlider, i, 0);
         }
 
-        //wait();
+        wait();
 
         pixels[0].opacity(1);
         selectionBox.opacity(0);
@@ -309,7 +320,7 @@ struct PixelsScene : public Scene {
             Transform(pixels[2].clone().opacity(1), selectionBox, true)
         );
 
-        //wait();
+        wait();
 
         for (int i = 2; i < 10; i++) {
             play(Shift(selectionBox, {1, 0, 0}), 10);
@@ -321,7 +332,7 @@ struct PixelsScene : public Scene {
             color_sync(pixel, pixels, colorSlider, i, 2);
         }
 
-        //wait();
+        wait();
 
         pixels[2].opacity(1);
         selectionBox.opacity(0);
@@ -333,7 +344,7 @@ struct PixelsScene : public Scene {
         tmpAlpha.opacity(0);
         pixels[3].opacity(1);
 
-        //wait();
+        wait();
 
         play(Rotate(pixels, -90));
         init_color_slider(colorSlider, 3);
@@ -345,7 +356,7 @@ struct PixelsScene : public Scene {
             Transform(pixels[3].clone().opacity(1), selectionBox, true)
         );
 
-        //wait();
+        wait();
 
         for (int i = 10; i > 0; i--) {
             play(MoveTo(selectionBox, colorSlider[i].get_center()), 10);
@@ -357,7 +368,7 @@ struct PixelsScene : public Scene {
             color_sync(pixel, pixels, colorSlider, i, 3);
         }
 
-        //wait();
+        wait();
 
         tmpAlpha = pixels[3].clone();
         tmpAlpha.opacity(1);
@@ -371,7 +382,7 @@ struct PixelsScene : public Scene {
         selectionBox.opacity(0);
         colorSlider.opacity(0);
 
-        //wait();
+        wait();
 
         pixel_logo_anim(pixels);
     }
@@ -401,8 +412,9 @@ struct PixelsScene : public Scene {
 
 int main() {
     hanim::HEngine::default_config1();
+    //hanim::HEngine::set_window_size(320, 240);
     //hanim::HEngine::default_config2();
     hanim::HEngine::recorder_file_name("hello-pixels");
-    hanim::HEngine::render(PixelsScene());
+    hanim::HEngine::render(HelloPixels());
     return 0;
 }
