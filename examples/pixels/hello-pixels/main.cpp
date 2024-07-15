@@ -6,7 +6,7 @@
 base-on:
     date: 2024/7/15
     os: ubuntu22.04
-    commit-id: 6089136e6566245227a8cd7b75974829a71ea998
+    commit-id: e8959b2fc766735f4f0e0c752fe42f485b0b6fc2 +- 1
 
 // Bug: DrawBorder for Rect when 30fps
 
@@ -20,7 +20,7 @@ const static int THICKNESS_240P = 1;
 const static int THICKNESS_480P = 2;
 const static int THICKNESS_1080P = 4;
 
-const static int THICKNESS =  THICKNESS_480P; // THICKNESS_1080P;
+const static int THICKNESS = THICKNESS_480P; // THICKNESS_1080P;
 
 static std::vector<std::vector<float>> ikArtistMap {
     { 8, 8, 8, 8, 8, 8, 8, 7, 6, 6, 8, 8, 8, 8, 8, 8 },
@@ -126,8 +126,41 @@ struct HelloPixels : public Scene {
         play(fadeOut, 90);
     }
 
-    virtual void timeline() override {
+    void ik_art_anim(float time = 2 /* sec */) {
+        // draw-ikArtist
+        auto ikGrayPicture = HObject();
+        for (int i = 0; i < 16 * 16; i++) {
+            int x = i / 16;
+            int y = i % 16;
+            auto p = Rectangle().fill_color(Color(0.1) * ikArtistMap[x][y]);
+            p.scale(0.25);
+            p.move_to({x * 0.25 + 0.125, y * 0.25 + 0.125, 0});
+            ikGrayPicture.add(p);
+        }
+        ikGrayPicture.move_to({0, 0, 0});
+        ikGrayPicture.rotate(-90);
+        ikGrayPicture.scale(1.4);
+        play(DrawBorder(ikGrayPicture));
 
+        auto basketball = Circle()
+            .scale(0.5)
+            .shift({2.25, 2.25, 0})
+            .thickness(THICKNESS)
+            .color({0, 0, 0.5, 0.8})
+            .fill_color({0.87, 0.45, 0.13, 0.6});
+
+        play(DrawBorder(basketball));
+
+        simulate_free_fall(basketball, 2.25, -2.25, 60 * time);
+
+        play(HAnimGroup(
+            Transform(ikGrayPicture, basketball.clone().opacity(0)),
+            Opacity(basketball, 0)
+        ));
+
+    }
+
+    void main_timeline() {
         start_anim();
 
         wait();
@@ -201,11 +234,11 @@ struct HelloPixels : public Scene {
         pixelGrid.opacity(0);
         selectionBox.opacity(0);
         auto colorSlider = grayVals;
+        ikGrayPicture.opacity(0);
         play(HAnimGroup(
-            Transform(ikGrayPicture, pixel),
+            Transform(ikGrayPicture.clone().opacity(1), pixel, true),
             Transform(grayVals, pixel)
         ));
-        ikGrayPicture.opacity(0);
         grayVals.opacity(0);
 
         wait();
@@ -334,9 +367,6 @@ struct HelloPixels : public Scene {
 
         wait();
 
-        pixels[2].opacity(1);
-        selectionBox.opacity(0);
-
         // A - Alpha
 
         auto tmpAlpha = pixels[3].clone();
@@ -345,6 +375,9 @@ struct HelloPixels : public Scene {
         pixels[3].opacity(1);
 
         wait();
+
+        pixels[2].opacity(1);
+        selectionBox.opacity(0);
 
         play(Rotate(pixels, -90));
         init_color_slider(colorSlider, 3);
@@ -384,7 +417,42 @@ struct HelloPixels : public Scene {
 
         wait();
 
-        pixel_logo_anim(pixels);
+        ikGrayPicture.move_to(pixel.get_center());
+        ikGrayPicture.scale(1.4);
+        play(Transform(pixels, ikGrayPicture.clone().opacity(1)));
+
+        wait();
+
+        auto basketball = Circle()
+            .scale(0.5)
+            .shift({2.25, 2.25, 0})
+            .thickness(THICKNESS)
+            .color({0, 0, 0.5, 0.8})
+            .fill_color({0.87, 0.45, 0.13, 0.6});
+
+        play(DrawBorder(basketball));
+
+        wait();
+
+        simulate_free_fall(basketball, 2.25, -2.25, 120);
+
+        wait();
+
+        play(HAnimGroup(
+            Transform(pixels, basketball.clone().opacity(0)),
+            Opacity(basketball, 0)
+            //Opacity(pixels, 0), // error - TODO: components opacity issue
+        ));
+
+        wait();
+
+        pixel_logo_anim(pixel);
+    }
+
+    virtual void timeline() override {
+
+        main_timeline();
+        //ik_art_anim(120);
     }
 
     void color_sync(HObject &pixel, HObject &pixels, HObject &colorSlider, int index, int channel) {
@@ -408,6 +476,35 @@ struct HelloPixels : public Scene {
         }
     }
 
+    void simulate_free_fall(HObject &obj, float objY, float horizontalY, int totalFrameNumber) {
+        float positionY = objY;
+        float velocity = 0;
+        float gravity = 0.98, restitution = 0.2;
+
+        float restitutionDelta = 0.025 * totalFrameNumber / 120;
+
+        restitution += restitutionDelta > 0.5 ? 0.5 : restitutionDelta;
+
+        int f = 0, deltaF = 10;
+        float dt = deltaF / 20.0;
+
+        while (f <= totalFrameNumber) {
+            positionY += velocity * dt;
+            velocity -= gravity * dt;
+
+            // 如果位置低于地面，进行反弹
+            if (positionY < horizontalY) {
+                positionY = horizontalY;
+                velocity *= -restitution;
+            }
+
+            auto pos = obj.get_center();
+            pos[1] = positionY;
+
+            play(MoveTo(obj, pos), deltaF);
+            f += deltaF;
+        }
+    }
 };
 
 int main() {

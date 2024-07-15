@@ -405,18 +405,31 @@ public: // static member
         if ((obj1.mData->componentMode == false && obj2.mData->componentMode == false)) {
             HONLY_LOGW("obj1 and obj2 aren't components");
         } else if (obj1.mData->componentMode && obj2.mData->componentMode) {
+            // TODO: size1 == 0 ? - size2 / size1
             int size1 = obj1.mData->components.size();
             int size2 = obj2.mData->components.size();
             if (size1 < size2) {
-                obj1.mData->components.resize(
-                    size2,
-                    obj1.mData->components.back()
-                );
+                int dupNumber = size2 / size1;
+                obj1.mData->components.reserve(size2);
+                while (--dupNumber) {
+                    for (int i = 0; i < size1; i++) {
+                        obj1.mData->components.push_back(obj1.mData->components[i]);
+                    }
+                }
+                for (int i = 0; i < size1 && size2 != obj1.mData->components.size(); i++) {
+                    obj1.mData->components.push_back(obj1.mData->components[i]);
+                }
             } else if (size1 > size2) {
-                obj2.mData->components.resize(
-                    size1,
-                    obj2.mData->components.back()
-                );
+                obj2.mData->components.reserve(size2);
+                int dupNumber = size1 / size2;
+                    while (--dupNumber) {
+                        for (int i = 0; i < size2; i++) {
+                            obj2.mData->components.push_back(obj2.mData->components[i]);
+                        }
+                    }
+                for (int i = 0; i < size2 && size2 != obj2.mData->components.size(); i++) {
+                    obj2.mData->components.push_back(obj2.mData->components[i]);
+                }
             }
         } else if (!obj1.mData->componentMode) {
             int size = obj2.mData->components.size();
