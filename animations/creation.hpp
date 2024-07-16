@@ -18,10 +18,7 @@ public:
         int pointNumber = mStartHObject._get_data()->points.size();
         mStartHObject._get_data()->points.clear();
         mStartHObject._get_data()->points.resize(pointNumber, mRenderHObject._get_data()->center);
-        // TODO: opacity issue
-        auto col = mRenderHObject.get_fill_color();
-        col[3] = 0;
-        mRenderHObject.fill_color(col);
+        mRenderHObject.fill_opacity(0);
     }
 
     void process(int currentFrame) {
@@ -37,7 +34,7 @@ public:
             mRenderHObject._get_data()->points = std::move(points);
         } else {
             int frameOffset = mFrameNumber * alphaPart;
-            Opacity(mRenderHObject, mTargetHObject.get_fill_color()[3])
+            Opacity(mRenderHObject, mTargetHObject.get_fill_opacity(), false, true)
                 .setFrameNumber(mFrameNumber - frameOffset)
                 .begin()
                 .update(currentFrame - frameOffset)

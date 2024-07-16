@@ -79,7 +79,7 @@ public: // begin / update / finish - mode use in frameworks
 
     virtual HAnimate & begin(bool preprocessFlag = true) {
         mRenderHObject.move_sema(false);
-        mRenderHObject.active() = true;
+        mRenderHObject.active(true);
         if(preprocessFlag) preprocess();
         return *this;
     }
@@ -91,7 +91,7 @@ public: // begin / update / finish - mode use in frameworks
 
     virtual HAnimate & finish(bool postprocessFlag = true) {
         if(postprocessFlag) postprocess();
-        mRenderHObject.active() = false;
+        mRenderHObject.active(false); // TODO: parallel animate issue?
         mRenderHObject.move_sema(true);
         return *this;
     }
@@ -356,7 +356,7 @@ public:
     template <typename... Args>
     void apply_to_all(Args... args) {
         // stop recursive contruct for AnimType
-        if (mRenderHObject.isComponents()) {
+        if (mRenderHObject.is_components()) {
             auto objs = mRenderHObject.getObjs();
             for (auto objPtr : objs) {
                 mAnimTree.add(AnimType(objPtr->create_ref(), args...));

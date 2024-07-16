@@ -195,8 +195,8 @@ struct HelloPixels : public Scene {
         selectionBox.move_to(grayVals[5].get_center());
 
         play(HAnimGroup(
-            FillColor(pixel, {0.8, 0.8, 0.8, 1}),
-            MoveTo(selectionBox, grayVals[8].get_center())
+            FillColor(pixel, {0.8, 0.8, 0.8, 1})
+            //MoveTo(selectionBox, grayVals[8].get_center())
         ));
 
         wait();
@@ -241,7 +241,7 @@ struct HelloPixels : public Scene {
         ));
         grayVals.opacity(0);
 
-        wait();
+        wait(); // TODO: trigger static render bug
 
         // 2.RGB
         pixel.fill_color({0.5, 0.5, 0.5, 1});

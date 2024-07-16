@@ -7,7 +7,7 @@ struct MyTest : public hanim::Scene {
         auto rect = Rectangle({1, 1, 0}, {2, 2, 0})
             .fill_color({0, 1, 0, 1})
             .opacity(0.3)
-            .color({1, 1, 0, 0.5});
+            .stroke_color({1, 1, 0, 0.5});
 /*
         this->play(new Rotate(rect), 60);
         this->play(new Shift(rect));
@@ -174,16 +174,28 @@ struct MyTest : public hanim::Scene {
         play(Rotate(objs));
 */
 
-        auto objs = HObject().add(rect).add(line).add(circle);
-        play(Create(objs));
+        auto objs = HObject().add(rect).add(line);
 
+        HONLY_LOGE("xxx0 - %f %f",
+                objs.get_stroke_opacity(),
+                objs.get_fill_opacity()
+            );
+
+        play(Create(objs));
+/*
         play(HAnimGroup(
             Opacity(objs[0], 0),
             Opacity(objs[1], 0),
             Opacity(objs[2], 0)
         ));
+*/
 
-//        play(Opacity(objs, 0));
+        HONLY_LOGE("xxx1 - %f %f",
+                objs.get_stroke_opacity(),
+                objs.get_fill_opacity()
+            );
+        wait();
+        play(Opacity(objs, 0));
     }
 
 };
@@ -192,7 +204,7 @@ int main() {
     auto test = MyTest();
     hanim::HEngine::default_config1();
     //hanim::HEngine::recorder_lossless(true);
-    hanim::HEngine::set_window(true);
+    //hanim::HEngine::set_window(true);
     hanim::HEngine::render(test);
     hanim::HEngine::save_frame_to_img("hanim-img");
     return 0;

@@ -131,7 +131,7 @@ public: // interface
     // template
     virtual void generate_object_data() final {
 
-        if (isComponents()) {
+        if (is_components()) {
             // nothing
         } else {
             object_points_init(mData->points, mData->rgbs);
@@ -169,10 +169,10 @@ public: // get
         } else if (mData->points.size() > 0) {
                 objs.push_back(this);
         } else {
-            HONLY_LOGW("obj haven't any data");
+            HONLY_LOGW("obj haven't any data(HAnimGroup Root?)");
         }
 
-        HONLY_LOGI("objs.size - %ld", objs.size());
+        HONLY_LOGE("objs.size - %ld", objs.size());
         return objs;
     }
 
@@ -199,7 +199,7 @@ public: // get
         return  mData->fillRgbs;
     }
 
-    float get_opacity() const {
+    float get_stroke_opacity() const {
         return mData->rgbs[0][3];
     }
 
@@ -211,11 +211,11 @@ public: // get
         return  mData->thickness;
     }
 
-    bool & active() {
+    bool is_active() const {
         return mData->active;
     }
 
-    bool isComponents() const {
+    bool is_components() const {
         return mData->componentMode;
     }
 
@@ -240,7 +240,7 @@ public: // property setter
 std::vector<decltype(mData)> datas; \
 if (mData->points.size() > 0) datas.push_back(mData); \
 auto objs = getObjs(); \
-datas.reserve(objs.size()); \
+datas.reserve(objs.size() + 1); \
 for (auto objPtr : objs) datas.push_back(objPtr->mData); \
 for (auto &data : datas)
 
@@ -254,14 +254,14 @@ for (auto &data : datas)
         return *this;
     }
 
-    HObject & scale(float scale) {
-        if (scale <= 0) {
-            HONLY_LOGW("scale %lf <= 0 (reset to 0)", scale);
-            scale = 0;
+    HObject & scale(float value) {
+        if (value <= 0) {
+            HONLY_LOGW("scale %lf <= 0 (reset to 0)", value);
+            value = 0;
         }
         ComponentsForTemplate {
             for (vec3 &point : data->points) point -= mData->center;
-            for (vec3 &point : data->points) point *= scale;
+            for (vec3 &point : data->points) point *= value;
             for (vec3 &point : data->points) point += mData->center;
         }
         return *this;
@@ -280,38 +280,63 @@ for (auto &data : datas)
     }
 
     HObject & color(vec4 col) {
-        ComponentsForTemplate {
-            data->rgbs.clear();
-            data->rgbs.resize(data->points.size(), col);
-        }
+        stroke_color(col);
+        fill_color(col);
         return *this;
     }
 
-    HObject & colors(Colors cols) {
-        // TODO: optimize
+    HObject & stroke_color(Color col) {
         ComponentsForTemplate {
-            data->rgbs = std::move(cols);
-            int pointNumber = data->points.size();
-            if (data->rgbs.size() != pointNumber)
-                data->rgbs.resize(pointNumber, data->rgbs.back());
-        }
-        return *this;
-    }
-
-    HObject & fill_color(const vec4 &color) {
-        ComponentsForTemplate {
-            data->fillRgbs = color;
-        }
-        return *this;
-    }
-
-    // TODO: filled and border seperatly
-    HObject & opacity(float opacity, bool sync = true) {
-        ComponentsForTemplate {            
             for (auto &rgba : data->rgbs) {
-                rgba[3] = opacity;
+                rgba = col;
             }
-            if (sync) data->fillRgbs[3] = opacity;
+        }
+        return *this;
+    }
+
+    HObject & stroke_colors(Colors cols) {
+        if (cols.size() == 0) {
+            HONLY_LOGW("cols size is 0");
+        } else {
+            // TODO: optimize
+            ComponentsForTemplate {
+                data->rgbs = std::move(cols);
+                int pointNumber = data->points.size();
+                int i = 0;
+                data->rgbs.reserve(pointNumber);
+                while (data->rgbs.size() < pointNumber) {
+                    data->rgbs.push_back(data->rgbs[i++]);
+                }
+            }
+        }
+        return *this;
+    }
+
+    HObject & fill_color(const vec4 &col) {
+        ComponentsForTemplate {
+            data->fillRgbs = col;
+        }
+        return *this;
+    }
+
+    HObject & opacity(float value) {
+        stroke_opacity(value);
+        fill_opacity(value);
+        return *this;
+    }
+
+    HObject & stroke_opacity(float value) {
+        ComponentsForTemplate {
+            for (auto &rgba : data->rgbs) {
+                rgba[3] = value;
+            }
+        }
+        return *this;
+    }
+
+    HObject & fill_opacity(float value) {
+        ComponentsForTemplate {
+            data->fillRgbs[3] = value;
         }
         return *this;
     }
@@ -326,16 +351,16 @@ for (auto &data : datas)
         return *this;
     }
 
-    HObject & fill_opacity(float opacity) {
+    HObject & thickness(float value = 1.0) {
         ComponentsForTemplate {
-            data->fillRgbs[3] = opacity;
+            data->thickness = value;
         }
         return *this;
     }
 
-    HObject & thickness(float thickness = 1.0) {
+    HObject & active(bool enable) {
         ComponentsForTemplate {
-            data->thickness = thickness;
+            data->active = enable;
         }
         return *this;
     }
@@ -462,7 +487,7 @@ private:
         int pointsSize = 0;
         auto pointsSum =  [&] {
             vec3 v(0);
-            if (isComponents()) {
+            if (is_components()) {
                 for (auto &obj : mData->components) {
                     obj.compute_center(); // update sub-obj center
                     for (auto &p : obj.mData->points) {
@@ -564,7 +589,7 @@ public: // component
 
     int size() const {
         int size = 0;
-        if (isComponents()) {
+        if (is_components()) {
             for (auto &obj : mData->components) {
                 size += obj.size();
             }
@@ -592,6 +617,7 @@ public:
     }
 };
 
+// Note: addr rather than value
 bool operator==(const HObject &obj1, const HObject &obj2) {
     return obj1.mData == obj2.mData;
 }
