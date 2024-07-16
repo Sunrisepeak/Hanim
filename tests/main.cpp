@@ -1,6 +1,6 @@
 #include "hanim.h"
 
-struct MyScene : public hanim::Scene {
+struct MyTest : public hanim::Scene {
     virtual void timeline() override {
         using namespace hanim;
 
@@ -176,16 +176,24 @@ struct MyScene : public hanim::Scene {
 
         auto objs = HObject().add(rect).add(line).add(circle);
         play(Create(objs));
+
+        play(HAnimGroup(
+            Opacity(objs[0], 0),
+            Opacity(objs[1], 0),
+            Opacity(objs[2], 0)
+        ));
+
+//        play(Opacity(objs, 0));
     }
 
 };
 
 int main() {
-    auto myScene = MyScene();
+    auto test = MyTest();
     hanim::HEngine::default_config1();
     //hanim::HEngine::recorder_lossless(true);
-    //hanim::HEngine::set_window(true);
-    hanim::HEngine::render(myScene);
+    hanim::HEngine::set_window(true);
+    hanim::HEngine::render(test);
     hanim::HEngine::save_frame_to_img("hanim-img");
     return 0;
 }

@@ -114,7 +114,7 @@ private:
 
     void render(std::shared_ptr<hanim::HAnimate> animPtr) {
         animPtr->begin();
-        auto animObjs = animPtr->getObjects();
+        auto animObjs = animPtr->getAnimObjects();
         for (int i = 1; i <= animPtr->getFrameNumber(); i++) {
 
             Render::start();

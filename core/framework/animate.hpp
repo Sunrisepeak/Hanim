@@ -71,9 +71,8 @@ public:
 public:
 
     // TODO: use weak_ptr
-    virtual std::vector<HObject *> getObjects() {
-        std::vector<HObject *> objs = { &mRenderHObject };
-        return objs;
+    virtual std::vector<HObject *> getAnimObjects() {
+        return mRenderHObject.getObjs();
     }
 
 public: // begin / update / finish - mode use in frameworks
@@ -251,10 +250,10 @@ protected:
     }
 
 public:
-    virtual std::vector<HObject *> getObjects() override {
+    virtual std::vector<HObject *> getAnimObjects() override {
         std::vector<HObject *> objs;
         for (auto &node : *mAnimTreePtr) {
-            auto subObjs = node.animPtr->getObjects();
+            auto subObjs = node.animPtr->getAnimObjects();
             objs.reserve(objs.size() + subObjs.size());
             for (HObject * objPtr : subObjs) {
                 objs.push_back(objPtr);

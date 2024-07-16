@@ -153,18 +153,25 @@ public: // interface
 
 public: // get
 
+    // obj-tree to obj-vector (only return pointNum > 0 obj)
     virtual std::vector</* const */ HObject *> getObjs() /* const */ {
         std::vector</* const */ HObject *> objs;
-        if (mData->points.size() > 0)
-            objs.push_back(this);
         if (mData->componentMode) {
             HONLY_LOGI("obj componets - %ld", mData->components.size());
             for (auto &obj : mData->components) {
-                if (obj.mData->points.size() > 0) {
-                    objs.push_back(&obj);
-                }
+                auto subObjs = obj.getObjs();
+                objs.insert(
+                    objs.end(),
+                    subObjs.begin(),
+                    subObjs.end()
+                );
             }
+        } else if (mData->points.size() > 0) {
+                objs.push_back(this);
+        } else {
+            HONLY_LOGW("obj haven't any data");
         }
+
         HONLY_LOGI("objs.size - %ld", objs.size());
         return objs;
     }
@@ -228,21 +235,22 @@ public: // property setter
         return *this;
     }
 
-#define SubForTemplate \
-auto objs = getObjs(); \
+// only in-obj-comp（include root-node-obj
+#define ComponentsForTemplate \
 std::vector<decltype(mData)> datas; \
+if (mData->points.size() > 0) datas.push_back(mData); \
+auto objs = getObjs(); \
 datas.reserve(objs.size()); \
 for (auto objPtr : objs) datas.push_back(objPtr->mData); \
 for (auto &data : datas)
 
     HObject & shift(const vec3 &vec) {
-        SubForTemplate {
+        ComponentsForTemplate {
             for (vec3 &point : data->points) {
                 point += vec;
             }
-            //data->center += vec;
+            data->center += vec;
         }
-        mData->center += vec;
         return *this;
     }
 
@@ -251,7 +259,7 @@ for (auto &data : datas)
             HONLY_LOGW("scale %lf <= 0 (reset to 0)", scale);
             scale = 0;
         }
-        SubForTemplate {
+        ComponentsForTemplate {
             for (vec3 &point : data->points) point -= mData->center;
             for (vec3 &point : data->points) point *= scale;
             for (vec3 &point : data->points) point += mData->center;
@@ -260,7 +268,7 @@ for (auto &data : datas)
     }
 
     HObject & rotate(float angle, vec3 axis = {0, 0, 1}) {
-        SubForTemplate {
+        ComponentsForTemplate {
             for (vec3 &point : data->points) point -= mData->center;
             mat4 rotationMatrix = glm::rotate(mat4(1.0f), glm::radians(angle), axis);
             for (vec3 &point : data->points) {
@@ -272,7 +280,7 @@ for (auto &data : datas)
     }
 
     HObject & color(vec4 col) {
-        SubForTemplate {
+        ComponentsForTemplate {
             data->rgbs.clear();
             data->rgbs.resize(data->points.size(), col);
         }
@@ -281,7 +289,7 @@ for (auto &data : datas)
 
     HObject & colors(Colors cols) {
         // TODO: optimize
-        SubForTemplate {
+        ComponentsForTemplate {
             data->rgbs = std::move(cols);
             int pointNumber = data->points.size();
             if (data->rgbs.size() != pointNumber)
@@ -291,7 +299,7 @@ for (auto &data : datas)
     }
 
     HObject & fill_color(const vec4 &color) {
-        SubForTemplate {
+        ComponentsForTemplate {
             data->fillRgbs = color;
         }
         return *this;
@@ -299,7 +307,7 @@ for (auto &data : datas)
 
     // TODO: filled and border seperatly
     HObject & opacity(float opacity, bool sync = true) {
-        SubForTemplate {            
+        ComponentsForTemplate {            
             for (auto &rgba : data->rgbs) {
                 rgba[3] = opacity;
             }
@@ -309,7 +317,7 @@ for (auto &data : datas)
     }
 
     HObject & opacity_factor(float factor, bool sync = true) {
-        SubForTemplate {
+        ComponentsForTemplate {
             for (auto &rgba : data->rgbs) {
                 rgba[3] *= factor;
             }
@@ -319,14 +327,14 @@ for (auto &data : datas)
     }
 
     HObject & fill_opacity(float opacity) {
-        SubForTemplate {
+        ComponentsForTemplate {
             data->fillRgbs[3] = opacity;
         }
         return *this;
     }
 
     HObject & thickness(float thickness = 1.0) {
-        SubForTemplate {
+        ComponentsForTemplate {
             data->thickness = thickness;
         }
         return *this;
@@ -447,6 +455,8 @@ public: // static member
     }
 
 private:
+
+    // TODO: optimize use border to compute
     void compute_center() {
         // TODO: Optimize accurate issue
         int pointsSize = 0;
@@ -526,29 +536,42 @@ public: // component
         return mData->components[index];
     }
 
+    // only one interface for create components
     HObject & add(HObject obj) {
-        if (false == mData->componentMode) {
-            this->covert_to_components();
+        if (mData->points.size() == 0) {
+            *this = obj;
+        } else {
+            if (false == mData->componentMode) {
+                this->covert_to_components();
+            }
+            mData->components.push_back(obj);
+            compute_center();
         }
-        mData->components.push_back(obj);
-        compute_center();
         return *this;
     }
 
     void covert_to_components(int extendNum = 1) {
         if (!mData->componentMode) {
             if (mData->points.size() > 0) {
-                HObject obj;
-                obj.ref(*this);
-                // disconnect ref and reset self
-                mData = std::make_shared<ObjectData>();
                 mData->components.resize(
-                    extendNum, obj
+                    extendNum, *this
                 );
             }
             mData->componentMode = true;
             HONLY_LOGD("set componentMode -> true");
         }
+    }
+
+    int size() const {
+        int size = 0;
+        if (isComponents()) {
+            for (auto &obj : mData->components) {
+                size += obj.size();
+            }
+        } else {
+            size += 1;
+        }
+        return size;
     }
 
 protected:
