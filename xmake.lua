@@ -11,6 +11,7 @@ add_packages("gl-interface")
 add_includedirs(".")
 
 includes("tests")
+includes("examples/base")
 includes("examples/hello-animation")
 includes("examples/hi-animation")
 includes("examples/pixels/hello-pixels")

@@ -16,5 +16,6 @@
 // objects
 #include "objects/object.hpp"
 #include "objects/grid.hpp"
+#include "objects/pixels.hpp"
 
 #endif

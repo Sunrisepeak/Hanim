@@ -4,12 +4,18 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include <gl_interface.h>
 
 #include "utils/math.hpp"
 
 namespace hanim {
+
+struct HAABB {
+    vec3 min;
+    vec3 max;
+};
 
 class HObject { // HObject(data) is Ref Counter Type
 
@@ -26,6 +32,7 @@ class HObject { // HObject(data) is Ref Counter Type
         Points points;
         Colors rgbs;
         vec3 center;
+        HAABB aabb;
         bool active;
         // only allow one layer, components isn't tree
         std::vector<HObject> components;
@@ -38,6 +45,7 @@ class HObject { // HObject(data) is Ref Counter Type
             points {},
             rgbs {},
             center { 0 },
+            aabb { vec3(0), vec3(0) },
             components {}
         {
             // nothing
@@ -131,9 +139,7 @@ public: // interface
     // template
     virtual void generate_object_data() final {
 
-        if (is_components()) {
-            // nothing
-        } else {
+        if (!is_components()) {
             object_points_init(mData->points, mData->rgbs);
             if (mData->points.size() != mData->rgbs.size()) {
                 HONLY_LOGW("points.size isn't equal rgbs.size.resize from %ld to %ld",
@@ -144,11 +150,19 @@ public: // interface
             }
         }
 
-        compute_center();
+        compute_aabb();
+
+        mData->center = (mData->aabb.min + mData->aabb.max) / 2.0f;
+
+        HONLY_LOGD("center: %f %f %f - aabb: %f %f %f - %f %f %f",
+            mData->center[0], mData->center[1], mData->center[2],
+            mData->aabb.min[0], mData->aabb.min[1], mData->aabb.min[2],
+            mData->aabb.max[0], mData->aabb.max[1], mData->aabb.max[2]
+        );
     }
 
     virtual void object_points_init(Points &points, Colors &rgba) {
-
+        // impl by sub-class
     }
 
 public: // get
@@ -182,15 +196,14 @@ public: // get
         return objs;
     }
 
-    void aabb(Point &aa, Point &bb) {
-
-    }
-
 public: // get
 
     vec3 get_center() const {
-        //compute_center(); TODO: update?
         return mData->center;
+    }
+
+    const HAABB & get_aabb() const {
+        return mData->aabb;
     }
 
     DrawMode get_draw_mode() const {
@@ -259,6 +272,8 @@ for (auto &data : datas)
                 point += vec;
             }
             data->center += vec;
+            data->aabb.min += vec;
+            data->aabb.max += vec;
         }
         return *this;
     }
@@ -269,9 +284,13 @@ for (auto &data : datas)
             value = 0;
         }
         ComponentsForTemplate {
-            for (vec3 &point : data->points) point -= mData->center;
-            for (vec3 &point : data->points) point *= value;
-            for (vec3 &point : data->points) point += mData->center;
+            for (auto &p : data->points) {
+                point_center_helper(p, [&](auto &p) { p *= value; });
+            }
+
+            // TODO: verify - aabb
+            point_center_helper(data->aabb.min, [value](auto &p) { p *= value; });
+            point_center_helper(data->aabb.max, [value](auto &p) { p *= value; });
 
             if (data != mData) {
                 data->center -= mData->center;
@@ -297,6 +316,7 @@ for (auto &data : datas)
                 data->center += mData->center;
             }
         }
+        compute_aabb(); // TODO: optimize?
         return *this;
     }
 
@@ -508,33 +528,50 @@ public: // static member
 
 private:
 
-    // TODO: optimize use border to compute
-    void compute_center() {
-        // TODO: Optimize accurate issue
-        int pointsSize = 0;
-        auto pointsSum =  [&] {
-            vec3 v(0);
-            if (is_components()) {
-                for (auto &obj : mData->components) {
-                    obj.compute_center(); // update sub-obj center
-                    for (auto &p : obj.mData->points) {
-                        v += p;
-                        pointsSize++;
-                    }
-                }
-            } else {
-                for (auto &p : mData->points) {
-                    v += p;
-                    pointsSize++;
-                }
+    void compute_aabb() {
+        if (!is_components()) {
+            if (mData->points.size() > 0) {
+                try_to_update_aabb(HAABB{mData->points[0], mData->points[0]}, true);
+            }
+            for (auto i = 1; i < mData->points.size(); i++) {
+                try_to_update_aabb(HAABB{mData->points[i], mData->points[i]});
+            }
+        } else {
+
+            if (mData->components.size() > 0) {
+                mData->components[0].compute_aabb();
+                try_to_update_aabb(mData->components[0].get_aabb());
             }
 
-            return v;
-        }();
-        safe_divide(pointsSum, pointsSize);
-        mData->center = pointsSum;
-        HONLY_LOGI("object center(%lf %lf %lf)",
-            mData->center[0], mData->center[1], mData->center[2]);
+            for (int i = 1; i < mData->components.size(); i++) {
+                // TODO: when mData->components[i] is null object
+                // use aabb enable flag ? or use (0, 0, 0)?
+                mData->components[i].compute_aabb();
+                try_to_update_aabb(mData->components[i].get_aabb());
+            }
+        }
+    }
+
+    void try_to_update_aabb(const HAABB &aabb, bool force = false) {
+        if (force) {
+            mData->aabb = aabb;
+        } else {
+            for (int i = 0; i < 3; i++) {
+                if (aabb.min[i] < mData->aabb.min[i]) {
+                    mData->aabb.min[i] = aabb.min[i];
+                }
+                if (aabb.max[i] > mData->aabb.max[i]) {
+                    mData->aabb.max[i] = aabb.max[i];
+                }
+            }
+        }
+    }
+
+    using PointsHandler = std::function<void (vec3 &)>;
+    void point_center_helper(vec3 &points, PointsHandler pHandler) {
+        points -= mData->center;
+        pHandler(points);
+        points += mData->center;
     }
 
 private: // static
@@ -597,7 +634,8 @@ public: // component
                 this->covert_to_components();
             }
             mData->components.push_back(obj);
-            compute_center();
+            try_to_update_aabb(obj.get_aabb());
+            mData->center = (mData->aabb.min + mData->aabb.max) / 2.0f;
         }
         return *this;
     }
