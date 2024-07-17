@@ -131,7 +131,7 @@ public: // interface
     // template
     virtual void generate_object_data() final {
 
-        if (isComponents()) {
+        if (is_components()) {
             // nothing
         } else {
             object_points_init(mData->points, mData->rgbs);
@@ -153,19 +153,32 @@ public: // interface
 
 public: // get
 
+    // obj-tree to obj-vector (only return pointNum > 0 obj)
     virtual std::vector</* const */ HObject *> getObjs() /* const */ {
         std::vector</* const */ HObject *> objs;
-        if (mData->points.size() > 0)
-            objs.push_back(this);
         if (mData->componentMode) {
             HONLY_LOGI("obj componets - %ld", mData->components.size());
             for (auto &obj : mData->components) {
-                if (obj.mData->points.size() > 0) {
-                    objs.push_back(&obj);
+                auto subObjs = obj.getObjs();
+                if (subObjs.size() > 0) {
+                    objs.reserve(objs.size() + subObjs.size());
+                    objs.insert(
+                        objs.end(),
+                        subObjs.begin(),
+                        subObjs.end()
+                    );
                 }
             }
+        } else if (mData->points.size() > 0) {
+                objs.push_back(this);
         }
-        HONLY_LOGI("objs.size - %ld", objs.size());
+
+        if (objs.size() == 0) {
+            HONLY_LOGW("obj haven't any data(HAnimGroup Root?)");
+        } else {
+            HONLY_LOGD("objs.size - %ld", objs.size());
+        }
+
         return objs;
     }
 
@@ -192,7 +205,7 @@ public: // get
         return  mData->fillRgbs;
     }
 
-    float get_opacity() const {
+    float get_stroke_opacity() const {
         return mData->rgbs[0][3];
     }
 
@@ -204,11 +217,11 @@ public: // get
         return  mData->thickness;
     }
 
-    bool & active() {
+    bool is_active() const {
         return mData->active;
     }
 
-    bool isComponents() const {
+    bool is_components() const {
         return mData->componentMode;
     }
 
@@ -228,106 +241,153 @@ public: // property setter
         return *this;
     }
 
-#define SubForTemplate \
-auto objs = getObjs(); \
+// only in-obj-comp（include root-node-obj
+// Note: update root after sub-obj if SyncRoot is true
+#define ComponentsForTemplate \
 std::vector<decltype(mData)> datas; \
-datas.reserve(objs.size()); \
-for (auto objPtr : objs) datas.push_back(objPtr->mData); \
+if (is_components()) { \
+    auto objs = getObjs(); \
+    datas.reserve(objs.size()); \
+    for (auto objPtr : objs) datas.push_back(objPtr->mData); \
+} \
+datas.push_back(mData); \
 for (auto &data : datas)
 
     HObject & shift(const vec3 &vec) {
-        SubForTemplate {
+        ComponentsForTemplate {
             for (vec3 &point : data->points) {
                 point += vec;
             }
-            //data->center += vec;
+            data->center += vec;
         }
-        mData->center += vec;
         return *this;
     }
 
-    HObject & scale(float scale) {
-        if (scale <= 0) {
-            HONLY_LOGW("scale %lf <= 0 (reset to 0)", scale);
-            scale = 0;
+    HObject & scale(float value) {
+        if (value <= 0) {
+            HONLY_LOGW("scale %lf <= 0 (reset to 0)", value);
+            value = 0;
         }
-        SubForTemplate {
+        ComponentsForTemplate {
             for (vec3 &point : data->points) point -= mData->center;
-            for (vec3 &point : data->points) point *= scale;
+            for (vec3 &point : data->points) point *= value;
             for (vec3 &point : data->points) point += mData->center;
+
+            if (data != mData) {
+                data->center -= mData->center;
+                data->center *= value;
+                data->center += mData->center;
+            }
         }
         return *this;
     }
 
     HObject & rotate(float angle, vec3 axis = {0, 0, 1}) {
-        SubForTemplate {
-            for (vec3 &point : data->points) point -= mData->center;
+        ComponentsForTemplate {
             mat4 rotationMatrix = glm::rotate(mat4(1.0f), glm::radians(angle), axis);
+            for (vec3 &point : data->points) point -= mData->center;
             for (vec3 &point : data->points) {
                 point = vec3(rotationMatrix * vec4(point, 1.0f));
             }
             for (vec3 &point : data->points) point += mData->center;
+
+            if (data != mData) {
+                data->center -= mData->center;
+                data->center = vec3(rotationMatrix * vec4(data->center, 1.0f));
+                data->center += mData->center;
+            }
         }
         return *this;
     }
 
     HObject & color(vec4 col) {
-        SubForTemplate {
-            data->rgbs.clear();
-            data->rgbs.resize(data->points.size(), col);
-        }
+        stroke_color(col);
+        fill_color(col);
         return *this;
     }
 
-    HObject & colors(Colors cols) {
-        // TODO: optimize
-        SubForTemplate {
-            data->rgbs = std::move(cols);
-            int pointNumber = data->points.size();
-            if (data->rgbs.size() != pointNumber)
-                data->rgbs.resize(pointNumber, data->rgbs.back());
-        }
-        return *this;
-    }
-
-    HObject & fill_color(const vec4 &color) {
-        SubForTemplate {
-            data->fillRgbs = color;
-        }
-        return *this;
-    }
-
-    // TODO: filled and border seperatly
-    HObject & opacity(float opacity, bool sync = true) {
-        SubForTemplate {            
+    HObject & stroke_color(Color col) {
+        ComponentsForTemplate {
             for (auto &rgba : data->rgbs) {
-                rgba[3] = opacity;
+                rgba = col;
             }
-            if (sync) data->fillRgbs[3] = opacity;
         }
         return *this;
     }
 
-    HObject & opacity_factor(float factor, bool sync = true) {
-        SubForTemplate {
+    HObject & stroke_colors(Colors cols) {
+        if (cols.size() == 0) {
+            HONLY_LOGW("cols size is 0");
+        } else {
+            // TODO: optimize
+            Colors tmpCols;
+            ComponentsForTemplate {
+                int pointNumber = data->points.size();
+                tmpCols = cols;
+                if (tmpCols.size() > pointNumber) {
+                    tmpCols.resize(pointNumber);
+                } else {
+                    int i = 0;
+                    tmpCols.reserve(pointNumber);
+                    while (tmpCols.size() < pointNumber) {
+                        tmpCols.push_back(tmpCols[i++]);
+                    }
+                }
+                data->rgbs = std::move(tmpCols);
+            }
+        }
+        return *this;
+    }
+
+    HObject & fill_color(const vec4 &col) {
+        ComponentsForTemplate {
+            data->fillRgbs = col;
+        }
+        return *this;
+    }
+
+    HObject & opacity(float value) {
+        stroke_opacity(value);
+        fill_opacity(value);
+        return *this;
+    }
+
+    HObject & stroke_opacity(float value) {
+        ComponentsForTemplate {
+            for (auto &rgba : data->rgbs) {
+                rgba[3] = value;
+            }
+        }
+        return *this;
+    }
+
+    HObject & fill_opacity(float value) {
+        ComponentsForTemplate {
+            data->fillRgbs[3] = value;
+        }
+        return *this;
+    }
+
+    HObject & opacity_factor(float factor) {
+        ComponentsForTemplate {
             for (auto &rgba : data->rgbs) {
                 rgba[3] *= factor;
             }
-            if (sync) data->fillRgbs[3] *= factor;
+            data->fillRgbs[3] *= factor;
         }
         return *this;
     }
 
-    HObject & fill_opacity(float opacity) {
-        SubForTemplate {
-            data->fillRgbs[3] = opacity;
+    HObject & thickness(float value = 1.0) {
+        ComponentsForTemplate {
+            data->thickness = value;
         }
         return *this;
     }
 
-    HObject & thickness(float thickness = 1.0) {
-        SubForTemplate {
-            data->thickness = thickness;
+    HObject & active(bool enable) {
+        ComponentsForTemplate {
+            data->active = enable;
         }
         return *this;
     }
@@ -447,12 +507,14 @@ public: // static member
     }
 
 private:
+
+    // TODO: optimize use border to compute
     void compute_center() {
         // TODO: Optimize accurate issue
         int pointsSize = 0;
         auto pointsSum =  [&] {
             vec3 v(0);
-            if (isComponents()) {
+            if (is_components()) {
                 for (auto &obj : mData->components) {
                     obj.compute_center(); // update sub-obj center
                     for (auto &p : obj.mData->points) {
@@ -526,29 +588,34 @@ public: // component
         return mData->components[index];
     }
 
+    // only one interface for create components
     HObject & add(HObject obj) {
-        if (false == mData->componentMode) {
-            this->covert_to_components();
+        if (mData->points.size() == 0) {
+            *this = obj;
+        } else {
+            if (false == mData->componentMode) {
+                this->covert_to_components();
+            }
+            mData->components.push_back(obj);
+            compute_center();
         }
-        mData->components.push_back(obj);
-        compute_center();
         return *this;
     }
 
     void covert_to_components(int extendNum = 1) {
         if (!mData->componentMode) {
             if (mData->points.size() > 0) {
-                HObject obj;
-                obj.ref(*this);
-                // disconnect ref and reset self
-                mData = std::make_shared<ObjectData>();
                 mData->components.resize(
-                    extendNum, obj
+                    extendNum, *this
                 );
             }
             mData->componentMode = true;
             HONLY_LOGD("set componentMode -> true");
         }
+    }
+
+    int size() const {
+        return is_components() ? mData->components.size() : 1;
     }
 
 protected:
@@ -569,6 +636,7 @@ public:
     }
 };
 
+// Note: addr rather than value
 bool operator==(const HObject &obj1, const HObject &obj2) {
     return obj1.mData == obj2.mData;
 }

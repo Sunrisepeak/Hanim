@@ -38,7 +38,7 @@ public: // render
 
         // TODO: optimize - batch render
         for (auto obj : objs) {
-            if (obj->get_opacity() == 0 && obj->get_fill_opacity() == 0) {
+            if (obj->get_stroke_opacity() == 0 && obj->get_fill_opacity() == 0) {
                 continue;
             }
 

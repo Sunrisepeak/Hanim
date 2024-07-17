@@ -1,13 +1,13 @@
 #include "hanim.h"
 
-struct MyScene : public hanim::Scene {
+struct MyTest : public hanim::Scene {
     virtual void timeline() override {
         using namespace hanim;
 
         auto rect = Rectangle({1, 1, 0}, {2, 2, 0})
             .fill_color({0, 1, 0, 1})
             .opacity(0.3)
-            .color({1, 1, 0, 0.5});
+            .stroke_color({1, 1, 0, 0.5});
 /*
         this->play(new Rotate(rect), 60);
         this->play(new Shift(rect));
@@ -175,17 +175,27 @@ struct MyScene : public hanim::Scene {
 */
 
         auto objs = HObject().add(rect).add(line).add(circle);
+
         play(Create(objs));
+/*
+        play(HAnimGroup(
+            Opacity(objs[0], 0),
+            Opacity(objs[1], 0),
+            Opacity(objs[2], 0)
+        ));
+*/
+        play(Opacity(objs, 0));
     }
 
 };
 
 int main() {
-    auto myScene = MyScene();
+    auto test = MyTest();
     hanim::HEngine::default_config1();
+    hanim::HEngine::recorder_file_name("Hanim-Test");
     //hanim::HEngine::recorder_lossless(true);
     //hanim::HEngine::set_window(true);
-    hanim::HEngine::render(myScene);
+    hanim::HEngine::render(test);
     hanim::HEngine::save_frame_to_img("hanim-img");
     return 0;
 }

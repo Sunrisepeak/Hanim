@@ -71,16 +71,18 @@ public:
 public:
 
     // TODO: use weak_ptr
-    virtual std::vector<HObject *> getObjects() {
-        std::vector<HObject *> objs = { &mRenderHObject };
-        return objs;
+    virtual std::vector<HObject *> getAnimObjects() {
+        return {&mRenderHObject};
+        // TODO: convert tree to vector, Why crash?
+        // return mRenderHObject.getObjs();
     }
 
 public: // begin / update / finish - mode use in frameworks
 
     virtual HAnimate & begin(bool preprocessFlag = true) {
+        // TODO: Do AnimTree need to init mRenderHObject?
         mRenderHObject.move_sema(false);
-        mRenderHObject.active() = true;
+        mRenderHObject.active(true);
         if(preprocessFlag) preprocess();
         return *this;
     }
@@ -92,7 +94,7 @@ public: // begin / update / finish - mode use in frameworks
 
     virtual HAnimate & finish(bool postprocessFlag = true) {
         if(postprocessFlag) postprocess();
-        mRenderHObject.active() = false;
+        mRenderHObject.active(false); // TODO: parallel animate issue?
         mRenderHObject.move_sema(true);
         return *this;
     }
@@ -251,10 +253,10 @@ protected:
     }
 
 public:
-    virtual std::vector<HObject *> getObjects() override {
+    virtual std::vector<HObject *> getAnimObjects() override {
         std::vector<HObject *> objs;
         for (auto &node : *mAnimTreePtr) {
-            auto subObjs = node.animPtr->getObjects();
+            auto subObjs = node.animPtr->getAnimObjects();
             objs.reserve(objs.size() + subObjs.size());
             for (HObject * objPtr : subObjs) {
                 objs.push_back(objPtr);
@@ -357,7 +359,7 @@ public:
     template <typename... Args>
     void apply_to_all(Args... args) {
         // stop recursive contruct for AnimType
-        if (mRenderHObject.isComponents()) {
+        if (mRenderHObject.is_components()) {
             auto objs = mRenderHObject.getObjs();
             for (auto objPtr : objs) {
                 mAnimTree.add(AnimType(objPtr->create_ref(), args...));

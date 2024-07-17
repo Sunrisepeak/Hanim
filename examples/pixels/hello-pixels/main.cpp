@@ -45,13 +45,13 @@ static std::vector<std::vector<float>> ikArtistMap {
 struct HelloPixels : public Scene {
     void start_anim() {
         auto rect = Rectangle()
+            .scale(2)
             .shift({-3, 0, 0})
-            .thickness(THICKNESS)
-            .scale(2);
+            .thickness(THICKNESS);
         auto circle = Circle()
             .thickness(THICKNESS)
             .shift({3, 0, 0})
-            .color({0, 1, 0, 1})
+            .stroke_color({0, 1, 0, 1})
             .opacity(0.5);
         play(DrawBorder(rect));
         play(Transform(rect, circle));
@@ -63,7 +63,7 @@ struct HelloPixels : public Scene {
         auto pixel = Rectangle()
             .shift({x, y, 0})
             .thickness(THICKNESS)
-            .color({0, 1, 1, 1})
+            .stroke_color({0, 1, 1, 1})
             .fill_color({0.2, 0.2, 0.2, 0.2});
 
         play(HAnimGroup(Transform(hobj, pixel)));
@@ -87,7 +87,7 @@ struct HelloPixels : public Scene {
         };
         auto pixelOutAnim = HAnimGroup();
         for (int i = 0; i < 4; i++) {
-            pixels[i].color({1, 1, 0, 1});
+            pixels[i].stroke_color({1, 1, 0, 1});
             pixelOutAnim.add(Transform(
                 pixels[i],
                 pixels[i].clone().shift(pShifts[i]).fill_color(pColors[i])
@@ -96,7 +96,7 @@ struct HelloPixels : public Scene {
 
         play(pixelOutAnim);
 
-        auto box = Rectangle().color({1, 0, 0, 1}).thickness(THICKNESS);
+        auto box = Rectangle().stroke_color({1, 0, 0, 1}).thickness(THICKNESS);
         add(box);
         for (int i = 0; i < 4 * 4; i++) {
             int index = i % 4; // R0 G1 B2 A3
@@ -146,7 +146,7 @@ struct HelloPixels : public Scene {
             .scale(0.5)
             .shift({2.25, 2.25, 0})
             .thickness(THICKNESS)
-            .color({0, 0, 0.5, 0.8})
+            .stroke_color({0, 0, 0.5, 0.8})
             .fill_color({0.87, 0.45, 0.13, 0.6});
 
         play(DrawBorder(basketball));
@@ -167,7 +167,7 @@ struct HelloPixels : public Scene {
 
         auto pixel = Rectangle()
             .thickness(THICKNESS)
-            .color({0, 1, 1, 1})
+            .stroke_color({0, 1, 1, 1})
             .fill_color({0.5, 0.5, 0.5, 1});
 
         play(Create(pixel));
@@ -180,17 +180,17 @@ struct HelloPixels : public Scene {
         for (int i = 0; i < 11; i++) {
             auto grayV = Rectangle();
             Color c = {grayVal, grayVal, grayVal, 1};
-            grayV.color(c).fill_color(c);
+            grayV.stroke_color(c).fill_color(c);
             grayV.move_to({x, -2, 0});
             grayVals.add(grayV);
             grayVal += 0.1;
             x += 1;
         }
-        play(Transform(pixel.clone().color({0, 0, 0, 0}), grayVals, true));
+        play(Transform(pixel.clone().stroke_color({0, 0, 0, 0}), grayVals, true));
 
         wait();
 
-        auto selectionBox = Rectangle().color({1, 1, 0, 1});
+        auto selectionBox = Rectangle().stroke_color({1, 1, 0, 1});
         selectionBox.thickness(THICKNESS);
         selectionBox.move_to(grayVals[5].get_center());
 
@@ -241,7 +241,7 @@ struct HelloPixels : public Scene {
         ));
         grayVals.opacity(0);
 
-        wait();
+        wait(); // TODO: trigger static render bug
 
         // 2.RGB
         pixel.fill_color({0.5, 0.5, 0.5, 1});
@@ -262,7 +262,7 @@ struct HelloPixels : public Scene {
             auto p = pixel.clone()
                 .shift(pShifts[i])
                 .fill_color(pColors[i])
-                .color({0.5, 0.5, 0.5, 1});
+                .stroke_color({0.5, 0.5, 0.5, 1});
             pixels.add(p);
         }
 
@@ -272,12 +272,12 @@ struct HelloPixels : public Scene {
 
         for (int i = 0; i < 11; i++) {
             Color c = {0, 0.1 * i, 0, 1};
-            colorSlider[i].color({0, 0, 0, 0}).fill_color(c);
+            colorSlider[i].stroke_color({0, 0, 0, 0}).fill_color(c);
         }
 
         selectionBox = selectionBox.clone();
         selectionBox.move_to(colorSlider[2].get_center());
-        selectionBox.color({1, 1, 0, 1});
+        selectionBox.stroke_color({1, 1, 0, 1});
         pixels[1].opacity(0);
         play(HAnimGroup(
             Transform(pixels[1].clone().opacity(1), colorSlider, true),
@@ -307,7 +307,7 @@ struct HelloPixels : public Scene {
         auto p = pixel.clone()
                 .shift(pShifts[3])
                 .fill_color(pColors[3])
-                .color({0.5, 0.5, 0.5, 1})
+                .stroke_color({0.5, 0.5, 0.5, 1})
                 .opacity(0);
         pixels.add(p);
         
@@ -318,7 +318,7 @@ struct HelloPixels : public Scene {
         pixels[0].opacity(0);
         selectionBox = selectionBox.clone();
         selectionBox.move_to(colorSlider[2].get_center());
-        selectionBox.color({1, 1, 0, 1});
+        selectionBox.stroke_color({1, 1, 0, 1});
         play(
             Transform(pixels[0].clone().opacity(1), selectionBox, true)
         );
@@ -348,7 +348,7 @@ struct HelloPixels : public Scene {
         pixels[2].opacity(0);
         selectionBox = selectionBox.clone();
         selectionBox.move_to(colorSlider[2].get_center());
-        selectionBox.color({1, 1, 0, 1});
+        selectionBox.stroke_color({1, 1, 0, 1});
         play(
             Transform(pixels[2].clone().opacity(1), selectionBox, true)
         );
@@ -384,7 +384,7 @@ struct HelloPixels : public Scene {
         pixels[3].opacity(0);
         selectionBox = selectionBox.clone();
         selectionBox.move_to(colorSlider[10].get_center());
-        selectionBox.color({1, 1, 0, 1});
+        selectionBox.stroke_color({1, 1, 0, 1});
         play(
             Transform(pixels[3].clone().opacity(1), selectionBox, true)
         );
@@ -427,7 +427,7 @@ struct HelloPixels : public Scene {
             .scale(0.5)
             .shift({2.25, 2.25, 0})
             .thickness(THICKNESS)
-            .color({0, 0, 0.5, 0.8})
+            .stroke_color({0, 0, 0.5, 0.8})
             .fill_color({0.87, 0.45, 0.13, 0.6});
 
         play(DrawBorder(basketball));
@@ -450,7 +450,7 @@ struct HelloPixels : public Scene {
     }
 
     virtual void timeline() override {
-
+        //start_anim();
         main_timeline();
         //ik_art_anim(120);
     }

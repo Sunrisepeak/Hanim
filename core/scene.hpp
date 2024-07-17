@@ -16,7 +16,7 @@ class Scene {
 
     struct StaticObj {
         int startFrameNumber;
-        std::shared_ptr<hanim::HObject> objPtr;
+        hanim::HObject obj;
     };
 
 protected:
@@ -29,16 +29,14 @@ public:
 
     void add(hanim::HObject &obj, int startFrameNumber = -1) {
         for (auto &sObj : mStaticObjs) {
-            if (*(sObj.objPtr) == obj) {
+            if (sObj.obj == obj) {
                 HONLY_LOGW("add CObject to static-obj failed");
                 return;
             }
         }
-        auto objPtr = std::make_shared<hanim::HObject>();
-        objPtr->ref(obj);
         mStaticObjs.push_back(StaticObj{
             startFrameNumber < 0 ? mTimeline : startFrameNumber,
-            objPtr
+            obj.create_ref()
         });
     }
 
@@ -114,7 +112,7 @@ private:
 
     void render(std::shared_ptr<hanim::HAnimate> animPtr) {
         animPtr->begin();
-        auto animObjs = animPtr->getObjects();
+        auto animObjs = animPtr->getAnimObjects();
         for (int i = 1; i <= animPtr->getFrameNumber(); i++) {
 
             Render::start();
@@ -143,12 +141,12 @@ private:
         for (auto it = mStaticObjs.begin(); it != mStaticObjs.end();) {
             // TODO: remove second render obj
             if (it->startFrameNumber > mTimeline) break;
-            if (it->objPtr->active()) {
+            if (it->obj.is_active()) {
                 // use linked-list erase is O(1)
                 it = mStaticObjs.erase(it);
             } else {
-                Render::render_cobject(*(it->objPtr));
-                mFrameBuffVec.back().push_back(*(it->objPtr));
+                Render::render_cobject(it->obj);
+                mFrameBuffVec.back().push_back(it->obj);
                 it++;
             }
         }

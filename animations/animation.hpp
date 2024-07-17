@@ -51,31 +51,46 @@ private:
     vec3 mValue;
 };
 
-class Opacity : public HAnimate {
+class Opacity : public HParallelAnimate<Opacity> {
 public:
-    Opacity(HObject &obj, float value = 1.0)
-        : HAnimate(obj), mValue { value } { }
+    Opacity(HObject &obj, float value = 1.0, bool stroke = true, bool fill = true)
+        : HParallelAnimate(obj, value, stroke, fill), mValue { value }
+    {
+        mStroke = stroke;
+        mFill = fill;
+    }
+
+    Opacity(HObject &&obj, float value = 1.0, bool stroke = true, bool fill = true)
+        : Opacity(obj, value, stroke, fill) { }
+
+public: // interface impl
     void preprocess() override {
         mTargetHObject = mStartHObject = mRenderHObject;
-        mTargetHObject.opacity(mValue);
+        if (mStroke) mTargetHObject.stroke_opacity(mValue);
+        if (mFill) mTargetHObject.fill_opacity(mValue);
     }
     void process(int currentFrame) override {
         float alpha = 1.0 * currentFrame / mFrameNumber;
-        auto targetOpacity = Interpolator::value(
-            mStartHObject.get_opacity(),
-            mTargetHObject.get_opacity(),
-            alpha
-        );
-        auto targetFillOpacity = Interpolator::value(
-            mStartHObject.get_fill_opacity(),
-            mTargetHObject.get_fill_opacity(),
-            alpha
-        );
-        mRenderHObject.opacity(targetOpacity, false);
-        mRenderHObject.fill_opacity(targetFillOpacity);
+        if (mStroke) {
+            auto opacity = Interpolator::value(
+                mStartHObject.get_stroke_opacity(),
+                mTargetHObject.get_stroke_opacity(),
+                alpha
+            );
+            mRenderHObject.stroke_opacity(opacity);
+        }
+        if (mFill) {
+            auto opacity = Interpolator::value(
+                mStartHObject.get_fill_opacity(),
+                mTargetHObject.get_fill_opacity(),
+                alpha
+            );
+            mRenderHObject.fill_opacity(opacity);
+        }
     }
 private:
     float mValue;
+    bool mStroke, mFill;
 };
 
 class ColorUpdate : public HAnimate {
