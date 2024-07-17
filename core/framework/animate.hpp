@@ -72,12 +72,15 @@ public:
 
     // TODO: use weak_ptr
     virtual std::vector<HObject *> getAnimObjects() {
-        return mRenderHObject.getObjs();
+        return {&mRenderHObject};
+        // TODO: convert tree to vector, Why crash?
+        // return mRenderHObject.getObjs();
     }
 
 public: // begin / update / finish - mode use in frameworks
 
     virtual HAnimate & begin(bool preprocessFlag = true) {
+        // TODO: Do AnimTree need to init mRenderHObject?
         mRenderHObject.move_sema(false);
         mRenderHObject.active(true);
         if(preprocessFlag) preprocess();

@@ -174,12 +174,7 @@ struct MyTest : public hanim::Scene {
         play(Rotate(objs));
 */
 
-        auto objs = HObject().add(rect).add(line);
-
-        HONLY_LOGE("xxx0 - %f %f",
-                objs.get_stroke_opacity(),
-                objs.get_fill_opacity()
-            );
+        auto objs = HObject().add(rect).add(line).add(circle);
 
         play(Create(objs));
 /*
@@ -189,12 +184,6 @@ struct MyTest : public hanim::Scene {
             Opacity(objs[2], 0)
         ));
 */
-
-        HONLY_LOGE("xxx1 - %f %f",
-                objs.get_stroke_opacity(),
-                objs.get_fill_opacity()
-            );
-        wait();
         play(Opacity(objs, 0));
     }
 
@@ -203,6 +192,7 @@ struct MyTest : public hanim::Scene {
 int main() {
     auto test = MyTest();
     hanim::HEngine::default_config1();
+    hanim::HEngine::recorder_file_name("Hanim-Test");
     //hanim::HEngine::recorder_lossless(true);
     //hanim::HEngine::set_window(true);
     hanim::HEngine::render(test);

@@ -143,10 +143,10 @@ private:
             if (it->startFrameNumber > mTimeline) break;
             if (it->obj.is_active()) {
                 // use linked-list erase is O(1)
-                it++;//it = mStaticObjs.erase(it);
+                it = mStaticObjs.erase(it);
             } else {
-                //Render::render_cobject(it->obj);
-                //mFrameBuffVec.back().push_back(it->obj);
+                Render::render_cobject(it->obj);
+                mFrameBuffVec.back().push_back(it->obj);
                 it++;
             }
         }
