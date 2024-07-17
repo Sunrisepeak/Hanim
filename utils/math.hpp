@@ -1,7 +1,7 @@
 #ifndef MATH_HPP_HANIM
 #define MATH_HPP_HANIM
 
-#include <third-party/third_party_header.hpp>
+#include <third-party/third_party.hanim.h>
 
 using vec3 = glm::vec3;
 using vec4 = glm::vec4;

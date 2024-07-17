@@ -5,7 +5,7 @@
 #include <thread>
 #include <chrono>
 
-#include <third-party/third_party_header.hpp>
+#include <third-party/third_party.hanim.h>
 
 // core
 #include "core/scene.hpp"

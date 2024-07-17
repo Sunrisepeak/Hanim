@@ -5,7 +5,7 @@
 #include <list>
 #include <memory>
 
-#include <third-party/third_party_header.hpp>
+#include <third-party/third_party.hanim.h>
 
 #include "core/render.hpp"
 
