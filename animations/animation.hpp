@@ -23,7 +23,7 @@ private: \
 
 //PropertyAnimateTemplate(Shift, shift, vec3, vec3(1, 0, 0))
 PropertyAnimateTemplate(Scale, scale, float, 2)
-PropertyAnimateTemplate(Rotate, rotate, float, 90)
+//PropertyAnimateTemplate(Rotate, rotate, float, 90)
 //PropertyAnimateTemplate(Opacity, opacity, float, 1)
 PropertyAnimateTemplate(Thickness, thickness, float, 1)
 //PropertyAnimateTemplate(Color, color, vec4, vec4(1, 0, 0, 0.5))
@@ -49,6 +49,24 @@ public:
     }
 private:
     vec3 mValue;
+};
+
+class Rotate : public HAnimate {
+public:
+    Rotate(HObject &obj, float value = 90)
+        : HAnimate(obj), mValue { value } { }
+    void preprocess() override {
+        mStartHObject = mRenderHObject;
+    }
+    void process(int currentFrame) override {
+        float alpha = 1.0 * currentFrame / mFrameNumber;
+        auto target = Interpolator::value(0.0f, mValue, alpha);
+        mTargetHObject = mStartHObject;
+        // only use points?
+        mRenderHObject = mTargetHObject.rotate(target);
+    }
+private:
+    float mValue;
 };
 
 class Opacity : public HParallelAnimate<Opacity> {

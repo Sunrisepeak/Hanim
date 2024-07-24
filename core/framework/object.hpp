@@ -12,6 +12,8 @@
 
 namespace hanim {
 
+class HAnimate;
+
 struct HAABB {
     vec3 min;
     vec3 max;
@@ -165,8 +167,6 @@ public: // interface
         // impl by sub-class
     }
 
-public: // get
-
     // obj-tree to obj-vector (only return pointNum > 0 obj)
     virtual std::vector</* const */ HObject *> getObjs() /* const */ {
         std::vector</* const */ HObject *> objs;
@@ -194,6 +194,11 @@ public: // get
         }
 
         return objs;
+    }
+
+    // TODO: custom animate...
+    virtual std::shared_ptr<HAnimate> animate(int tag) {
+        return nullptr;
     }
 
 public: // get
@@ -306,7 +311,9 @@ for (auto &data : datas)
             mat4 rotationMatrix = glm::rotate(mat4(1.0f), glm::radians(angle), axis);
             for (vec3 &point : data->points) point -= mData->center;
             for (vec3 &point : data->points) {
-                point = vec3(rotationMatrix * vec4(point, 1.0f));
+                vec4 homogenousPoint = vec4(point, 1.0f);
+                vec4 rotatedPoint = rotationMatrix * homogenousPoint;
+                point = vec3(rotatedPoint);
             }
             for (vec3 &point : data->points) point += mData->center;
 

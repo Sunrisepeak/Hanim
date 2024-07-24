@@ -4,8 +4,19 @@ using namespace hanim;
 
 struct PixelPanelExample : public Scene {
     virtual void timeline() override {
-        play(DrawBorder(PixelPanel()));
-        play(DrawBorder(Circle()));
+        auto pPanel = PixelPanel();
+        play(Create(pPanel));
+        play(FillColor(pPanel, {0, 0, 1, 0.5}));
+
+        for (int i = 0; i < pPanel.width(); i++) {
+            for (int j = 0; j < pPanel.height(); j++) {
+                if ((i + j) % 2 == 0) {
+                    play(Opacity(pPanel[i][j], 0), 5);
+                }
+            }
+        }
+
+        play(Rotate(pPanel));
     }
 };
 
