@@ -188,7 +188,7 @@ public: // interface
         }
 
         if (objs.size() == 0) {
-            HONLY_LOGW("obj haven't any data(HAnimGroup Root?)");
+            HONLY_LOGD("obj haven't any data(HAnimGroup Root?)");
         } else {
             HONLY_LOGD("objs.size - %ld", objs.size());
         }
@@ -215,7 +215,7 @@ public: // get
         return mData->drawMode;
     }
 
-    const Color & get_color() const {
+    const Color & get_stroke_color() const {
         return mData->rgbs[0];
     }
 

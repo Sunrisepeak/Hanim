@@ -54,19 +54,16 @@ private:
 class Rotate : public HAnimate {
 public:
     Rotate(HObject &obj, float value = 90)
-        : HAnimate(obj), mValue { value } { }
-    void preprocess() override {
-        mStartHObject = mRenderHObject;
-    }
+        : HAnimate(obj), mValue { value } { mOldValue = 0; }
     void process(int currentFrame) override {
         float alpha = 1.0 * currentFrame / mFrameNumber;
         auto target = Interpolator::value(0.0f, mValue, alpha);
-        mTargetHObject = mStartHObject;
-        // only use points?
-        mRenderHObject = mTargetHObject.rotate(target);
+        auto rotateDelta = target - mOldValue;
+        mRenderHObject.rotate(rotateDelta);
+        mOldValue = target;
     }
 private:
-    float mValue;
+    float mValue, mOldValue;
 };
 
 class Opacity : public HParallelAnimate<Opacity> {
@@ -113,23 +110,40 @@ private:
 
 class ColorUpdate : public HAnimate {
 public:
-    ColorUpdate(HObject &obj, Color value = {1, 1, 1, 1})
-        : HAnimate(obj), mValue { value } { }
+    ColorUpdate(HObject &obj, Color value = {1, 1, 1, 1}, bool stroke = true, bool fill = true)
+        : HAnimate(obj), mValue { value }
+    {
+        mStroke = stroke;
+        mFill = fill;
+    }
+
     void preprocess() override {
         mTargetHObject = mStartHObject = mRenderHObject;
-        mTargetHObject.color(mValue);
+        if (mStroke) mTargetHObject.stroke_color(mValue);
+        if (mFill) mTargetHObject.fill_color(mValue);
     }
     void process(int currentFrame) override {
         float alpha = 1.0 * currentFrame / mFrameNumber;
-        auto color = Interpolator::value(
-            mStartHObject.get_color(),
-            mTargetHObject.get_color(),
-            alpha
-        );
-        mRenderHObject.color(color);
+        if (mStroke) {
+            auto color = Interpolator::value(
+                mStartHObject.get_stroke_color(),
+                mTargetHObject.get_stroke_color(),
+                alpha
+            );
+            mRenderHObject.stroke_color(color);
+        }
+        if (mFill) {
+            auto color = Interpolator::value(
+                mStartHObject.get_fill_color(),
+                mTargetHObject.get_fill_color(),
+                alpha
+            );
+            mRenderHObject.fill_color(color);
+        }
     }
 private:
     Color mValue;
+    bool mStroke, mFill;
 };
 
 class FillColor : public HAnimate {
@@ -154,6 +168,7 @@ private:
 };
 
 class MoveTo : public HAnimate {
+// support parallel
 public:
     MoveTo(HObject &obj, vec3 value = vec3(0))
         : HAnimate(obj), mValue { value } { }

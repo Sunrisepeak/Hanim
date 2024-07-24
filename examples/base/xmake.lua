@@ -1,3 +1,3 @@
-target("pixel-panel")
+target("base")
     set_kind("binary")
-    add_files("object/pixel_panel.cpp")
+    add_files("main.cpp")

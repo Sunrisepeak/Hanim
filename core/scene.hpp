@@ -30,7 +30,7 @@ public:
     void add(hanim::HObject &obj, int startFrameNumber = -1) {
         for (auto &sObj : mStaticObjs) {
             if (sObj.obj == obj) {
-                HONLY_LOGW("add CObject to static-obj failed");
+                HONLY_LOGD("add CObject to static-obj failed");
                 return;
             }
         }

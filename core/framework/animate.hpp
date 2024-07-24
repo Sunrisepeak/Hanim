@@ -59,7 +59,7 @@ protected:
 public:
     HAnimate & setFrameNumber(int frameNumber) {
         mFrameNumber = frameNumber;
-        HONLY_LOGW("set frameNumber %d", frameNumber);
+        HONLY_LOGI("set frameNumber %d", frameNumber);
         return *this;
     }
 

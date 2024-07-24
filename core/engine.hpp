@@ -83,8 +83,9 @@ public: // recorder
         _config().rLossless = enable;
     }
 
-    static void recorder_file_name(std::string name) {
+    static void recorder_file_name(std::string name, bool sync = false) {
         _config().rName = name;
+        if (sync) Instance().mRecorder.set_name(name);
     }
 
     static void recorder_repeat_write(int frameNumber = 60) {
@@ -93,6 +94,14 @@ public: // recorder
 
     static void save_frame_to_img(std::string name) {
         Instance().mRecorder.save_frame_to_img(name);
+    }
+
+    static void recorder_start() {
+        Instance().mRecorder.start();
+    }
+
+    static void recorder_stop() {
+        Instance().mRecorder.stop();
     }
 
 public: // window

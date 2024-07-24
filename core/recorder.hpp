@@ -73,6 +73,8 @@ public: // control
             (mLoseless ? "lossless" : "compressed") +
             std::string(".ha");
 
+        if (mVWriter.isOpened()) stop();
+
         mVWriter.open(
             (fileName + (mLoseless ? ".mkv" : ".mp4")).c_str(),
             mLoseless ? cv::VideoWriter::fourcc('H', 'F', 'Y', 'U') : // Huffman / mkv
@@ -109,13 +111,7 @@ public: // control
     }
 
     void stop() {
-        if (mVWriter.isOpened()) {
-            HONLY_LOGP("save to video-%dx%d-%d-%s...",
-                mWidth, mHeight, mFPS,
-                mLoseless ? "lossless" : "compressed"
-            );
-            mVWriter.release();
-        }
+        try_to_release();
     }
 
 private:
@@ -124,6 +120,17 @@ private:
     cv::Mat mPixels;
     cv::VideoWriter mVWriter;
     bool mLoseless;
+
+    void try_to_release() {
+        if (mVWriter.isOpened()) {
+            HONLY_LOGP("save(%s) to video-%dx%d-%d-%s...",
+                mName.c_str(),
+                mWidth, mHeight, mFPS,
+                mLoseless ? "lossless" : "compressed"
+            );
+            mVWriter.release();
+        }
+    }
 };
 
 }

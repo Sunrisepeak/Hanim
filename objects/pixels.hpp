@@ -21,17 +21,24 @@ private: //disable
 
 public:
     PixelPanel(float w = 2, float h = 2, float pixelSize = 0.25) {
+        // init root node - TODO: optimize by default?
         mData->componentMode = true;
-
+        mData->points.resize(1, vec3(1));
+        mData->rgbs.resize(1, vec4(1));
         fill_color({1, 1, 1, 1});
+        stroke_color({1, 0, 0, 1});
 
+        // init component
         auto pixel = Pixel().stroke_color({1, 0, 0, 1})
             .fill_color(get_fill_color())
+            .stroke_color(get_stroke_color())
             .scale(pixelSize / 1);
         float offset = pixelSize / 2;
 
         for (float y = 2; y > 0; y -= pixelSize) {
-            auto pixels = HObject().fill_color(get_fill_color());
+            auto pixels = HObject()
+                .stroke_color(get_stroke_color())
+                .fill_color(get_fill_color());
             for (float x = 0; x < 2; x += pixelSize) {
                 pixels.add(pixel.move_to({x + offset, y - offset, 0}));
             }

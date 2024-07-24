@@ -29,10 +29,8 @@ struct Interpolator {
         HObject obj;
         HObject::align_checker(obj1, obj2);
         if (obj1.is_components() || obj2.is_components()) {
-            int componentsNum = obj1.mData->components.size();
-            obj.mData->componentMode = true;
-            obj.mData->components.resize(componentsNum);
-            for (int i = 0; i < componentsNum; i++) {
+            obj = obj1;
+            for (int i = 0; i < obj1.mData->components.size(); i++) {
                 obj.mData->components[i] = Interpolator::hobject(
                     obj1.mData->components[i], obj2.mData->components[i],
                     alpha
