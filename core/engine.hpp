@@ -23,6 +23,14 @@ public: // im-mode
         Instance().mScene.play(anim, frameNumber);
     }
 
+    static void add(HObject &obj) {
+        Instance().mScene.add(obj);
+    }
+
+    static void wait(int frameNumber) {
+        Instance().mScene.wait(frameNumber);
+    }
+
 public:
     static void render(Scene &scene) {
         Instance()._render(scene);

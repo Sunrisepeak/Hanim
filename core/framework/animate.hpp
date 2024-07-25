@@ -57,13 +57,13 @@ protected:
     HAnimate() : HAnimate(HObject()) { }
 
 public:
-    HAnimate & setFrameNumber(int frameNumber) {
+    HAnimate & set_frame_number(int frameNumber) {
         mFrameNumber = frameNumber;
         HONLY_LOGI("set frameNumber %d", frameNumber);
         return *this;
     }
 
-    int getFrameNumber() const {
+    int get_frame_number() const {
         HONLY_LOGI("animate frame number is %d", mFrameNumber);
         return mFrameNumber;
     }
@@ -249,7 +249,7 @@ public:
 protected:
     void add(HAnimate *anim, int startFrame = 0) {
         mAnimTreePtr->push_back({std::unique_ptr<HAnimate>(anim), startFrame});
-        mFrameNumber = std::max(mFrameNumber, startFrame + anim->getFrameNumber());
+        mFrameNumber = std::max(mFrameNumber, startFrame + anim->get_frame_number());
     }
 
 public:
@@ -270,12 +270,12 @@ public:
 // need use begin/update/finish mode to update status
     virtual void preprocess() final {
         for (auto &node : *mAnimTreePtr) {
-            if (node.animPtr->getFrameNumber() == 0) {
+            if (node.animPtr->get_frame_number() == 0) {
                 HONLY_LOGD("startFrame %d, mFrameNumber 0 -> %d",
                     node.startFrame,
                     mFrameNumber - node.startFrame
                 );
-                node.animPtr->setFrameNumber(mFrameNumber - node.startFrame);
+                node.animPtr->set_frame_number(mFrameNumber - node.startFrame);
             }
             node.animPtr->begin();
         }
@@ -326,7 +326,7 @@ public:
     virtual HAnimate & begin(bool preprocessFlag = true) final {
         HAnimate::begin(false);
         if (!mAnimTree.empty()) {
-            mAnimTree.setFrameNumber(mFrameNumber);
+            mAnimTree.set_frame_number(mFrameNumber);
             mAnimTree.begin();
         } else {
             if (preprocessFlag) preprocess();

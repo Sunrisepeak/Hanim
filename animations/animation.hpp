@@ -1,6 +1,8 @@
 #ifndef ANIMATION_HPP_HANIM
 #define ANIMATION_HPP_HANIM
 
+// base animations
+
 #include "core/framework.hpp"
 
 namespace hanim {
@@ -187,6 +189,36 @@ public:
     }
 private:
     vec3 mValue;
+};
+
+// -------------------
+
+class FadeIn : public HAnimate {
+public:
+    FadeIn(HObject &obj) : HAnimate(obj) { }
+
+public:
+    void preprocess() override {
+        mAnims = HAnimGroup(
+            Opacity(mRenderHObject, mRenderHObject.get_fill_opacity(), false, true),
+            Opacity(mRenderHObject, mRenderHObject.get_stroke_opacity(), true, false)
+        );
+        mAnims.set_frame_number(mFrameNumber);
+        mRenderHObject.opacity(0);
+        mAnims.begin();
+    }
+    void process(int currentFrame) override {
+        mAnims.update(currentFrame);
+    }
+    void postprocess() override {
+        mAnims.finish();
+    }
+private:
+    HAnimGroup mAnims;
+};
+
+struct FadeOut : public Opacity {
+    FadeOut(HObject &obj) : Opacity(obj, 0) { }
 };
 
 }

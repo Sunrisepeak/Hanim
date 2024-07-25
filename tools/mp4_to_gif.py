@@ -1,7 +1,7 @@
 import subprocess
 import os, sys
 
-crop_area = '256'
+crop_area = '250'
 
 # python3 tools/mp4_to_gif.py build/linux/x86_64/debug/
 
@@ -56,6 +56,8 @@ def process_directory(input_directory, output_directory):
             convert_mp4_to_gif(input_file, output_file)  
 
 if __name__ == "__main__":
-    assert len(sys.argv) == 2, "need file directory args"
+    assert len(sys.argv) >= 2, "need file directory args"
     target_dir = sys.argv[1]
+    if len(sys.argv) == 3:
+        crop_area = str(sys.argv[2])
     process_directory(target_dir, target_dir)

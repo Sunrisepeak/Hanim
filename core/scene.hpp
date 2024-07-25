@@ -100,20 +100,20 @@ private:
 
     void play_internal(hanim::HAnimate *anim, int frameNumber = 60) {
         auto animPtr = std::shared_ptr<hanim::HAnimate>(anim);
-        if (animPtr->getFrameNumber() == 0)
-            animPtr->setFrameNumber(frameNumber);
+        if (animPtr->get_frame_number() == 0)
+            animPtr->set_frame_number(frameNumber);
         //HONLY_LOGI("%ld", animPtr->mRenderCObject.mData->points.size());
 
         render(animPtr);
 
         mCAnimates.push_back(animPtr);
-        mTimeline += animPtr->getFrameNumber();
+        mTimeline += animPtr->get_frame_number();
     }
 
     void render(std::shared_ptr<hanim::HAnimate> animPtr) {
         animPtr->begin();
         auto animObjs = animPtr->getAnimObjects();
-        for (int i = 1; i <= animPtr->getFrameNumber(); i++) {
+        for (int i = 1; i <= animPtr->get_frame_number(); i++) {
 
             Render::start();
 

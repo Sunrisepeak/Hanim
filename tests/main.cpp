@@ -160,8 +160,8 @@ struct MyTest : public hanim::Scene {
 
         auto ag = CAnimGroup();
 
-        ag.setFrameNumber(120);
-        ag.add(Opacity(rect, 0).setFrameNumber(30), 60);
+        ag.set_frame_number(120);
+        ag.add(Opacity(rect, 0).set_frame_number(30), 60);
         ag.add(Opacity(rect2, 0), 0);
 
         play(ag);

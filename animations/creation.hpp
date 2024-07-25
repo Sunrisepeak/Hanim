@@ -3,6 +3,8 @@
 
 #include "core/framework.hpp"
 
+#include "animations/animation.hpp"
+
 namespace hanim {
 
 class Create : public hanim::HParallelAnimate<Create> {
@@ -19,26 +21,43 @@ public:
         mStartHObject._get_data()->points.clear();
         mStartHObject._get_data()->points.resize(pointNumber, mRenderHObject._get_data()->center);
         mRenderHObject.fill_opacity(0);
+        mStartHObject.fill_opacity(0);
     }
 
     void process(int currentFrame) {
         float alpha = currentFrame * 1.0 / mFrameNumber;
         std::vector<vec3> points;
         float alphaPart = mTargetHObject.get_fill_color()[3] > 0 ? 0.4 : 1;
-        if (alpha <= alphaPart) {
-            points = Interpolator::vector(
-                mStartHObject._get_data()->points,
-                mTargetHObject._get_data()->points,
-                alpha * 1 / alphaPart
-            );
-            mRenderHObject._get_data()->points = std::move(points);
-        } else {
+
+        // sync center for support parallel with move_to/shift
+        // TODO: better method?
+        if (mTargetHObject.get_center() != mRenderHObject.get_center()) {
+            mTargetHObject.move_to(mRenderHObject.get_center());
+            mStartHObject.move_to(mRenderHObject.get_center());
+        }
+
+        points = Interpolator::vector(
+            mStartHObject._get_data()->points,
+            mTargetHObject._get_data()->points,
+            alpha
+        );
+        mRenderHObject._get_data()->points = std::move(points);
+
+        if (alpha > alphaPart) {
             int frameOffset = mFrameNumber * alphaPart;
-            Opacity(mRenderHObject, mTargetHObject.get_fill_opacity(), false, true)
-                .setFrameNumber(mFrameNumber - frameOffset)
+            Opacity(mStartHObject, mTargetHObject.get_fill_opacity(), false, true)
+                .set_frame_number(mFrameNumber - frameOffset)
                 .begin()
                 .update(currentFrame - frameOffset)
                 .finish();
+            mRenderHObject.fill_opacity(mStartHObject.get_fill_opacity());
+            mStartHObject.fill_opacity(0);
+
+            HONLY_LOGI("%f - %d / %d",
+                mRenderHObject.get_fill_opacity(),
+                currentFrame - frameOffset,
+                mFrameNumber - frameOffset
+            );
         }
     }
 

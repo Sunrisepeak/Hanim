@@ -8,16 +8,11 @@
 
 #include <gl_interface.h>
 
-#include "utils/math.hpp"
+#include "core/framework/htype.hpp"
 
 namespace hanim {
 
 class HAnimate;
-
-struct HAABB {
-    vec3 min;
-    vec3 max;
-};
 
 class HObject { // HObject(data) is Ref Counter Type
 
@@ -31,7 +26,7 @@ class HObject { // HObject(data) is Ref Counter Type
         DrawMode drawMode; // GLI_NONE is off - default
         vec4 fillRgbs;
         float thickness;
-        Points points;
+        HPoints points;
         Colors rgbs;
         vec3 center;
         HAABB aabb;
@@ -43,7 +38,7 @@ class HObject { // HObject(data) is Ref Counter Type
             componentMode { false },
             drawMode { GLI_NONE },
             fillRgbs {0, 0, 0, 0},
-            thickness { 1 },
+            thickness { DEFAULT_THICKNESS },
             points {},
             rgbs {},
             center { 0 },
@@ -163,7 +158,7 @@ public: // interface
         );
     }
 
-    virtual void object_points_init(Points &points, Colors &rgba) {
+    virtual void object_points_init(HPoints &points, Colors &rgba) {
         // impl by sub-class
     }
 
@@ -405,7 +400,7 @@ for (auto &data : datas)
         return *this;
     }
 
-    HObject & thickness(float value = 1.0) {
+    HObject & thickness(float value = DEFAULT_THICKNESS) {
         ComponentsForTemplate {
             data->thickness = value;
         }

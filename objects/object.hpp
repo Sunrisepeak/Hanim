@@ -5,12 +5,29 @@
 
 namespace hanim {
 
+// TODO: using Point = Circle; ?
+
+struct Point : hanim::HObject {
+    Point(vec3 pos = {0, 0, 0}, float size = 3) : mPos { pos } {
+        generate_object_data();
+        thickness(size);
+    }
+
+    virtual void object_points_init(HPoints &points, Colors &colors) override {
+        points.push_back(mPos);
+        colors.resize(1, {1, 0, 0, 1});
+    }
+private:
+    vec3 mPos;
+};
 struct Line : hanim::HObject {
-    Line(vec3 pos1, vec3 pos2) : mPos1 { pos1 }, mPos2 { pos2 } {
+    Line(vec3 pos1 = {-0.5, 0, 0}, vec3 pos2 = {0.5, 0, 0}) :
+        mPos1 { pos1 }, mPos2 { pos2 }
+    {
         generate_object_data();
     }
 
-    virtual void object_points_init(Points &points, Colors &colors) override {
+    virtual void object_points_init(HPoints &points, Colors &colors) override {
         points.push_back(mPos1);
         points.push_back(mPos2);
         colors.resize(2, {1, 0, 0, 1});
@@ -21,12 +38,15 @@ private:
 };
 
 struct Triangle : hanim::HObject {
-    Triangle(vec3 pos1, vec3 pos2, vec3 pos3)
-        : mPos1 { pos1 }, mPos2 { pos2 }, mPos3 { pos3 } {
+    Triangle(
+        vec3 pos1 = {0, 0.5, 0},
+        vec3 pos2 = {-0.5, -0.5, 0},
+        vec3 pos3 = {0.5, -0.5, 0}
+    ) : mPos1 { pos1 }, mPos2 { pos2 }, mPos3 { pos3 } {
         generate_object_data();
     }
 
-    virtual void object_points_init(Points &points, Colors &colors) override {
+    virtual void object_points_init(HPoints &points, Colors &colors) override {
         points.resize(3);
         points[0] = mPos1;
         points[1] = mPos2;
@@ -47,7 +67,7 @@ struct Rectangle : hanim::HObject {
         generate_object_data();
     }
 
-    virtual void object_points_init(Points &points, Colors &colors) override {
+    virtual void object_points_init(HPoints &points, Colors &colors) override {
         points.resize(4);
         colors.resize(4, {1, 0, 0, 1});
         points[0] = {mPos2[0], mPos2[1], 0};
@@ -67,7 +87,7 @@ struct Circle : hanim::HObject {
         generate_object_data();
     }
 
-    virtual void object_points_init(Points &points, Colors &colors) override {
+    virtual void object_points_init(HPoints &points, Colors &colors) override {
         points.resize(mSegments);
         colors.resize(mSegments, {1, 0, 0, 1});
 

@@ -4,94 +4,137 @@
 
 using namespace hanim;
 
-std::string gObjName = "Null";
 int gRunIndex = 0;
+auto rect = Rectangle()
+    .fill_color(HColor::ORANGE)
+    .fill_opacity(0.5);
 
-static void create(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-Create", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::Create(obj));
-    hanim::HEngine::recorder_stop();
+struct AutoRecordHelper {
+    AutoRecordHelper(std::string name) {
+        HEngine::recorder_file_name(std::to_string(gRunIndex++) + "-" + name, true);
+        HEngine::recorder_start();
+    }
+    ~AutoRecordHelper() {
+        HEngine::recorder_stop();
+    }
+};
+
+static void fade_in() {
+    AutoRecordHelper _ar("FadeIn");
+
+    HEngine::play(FadeIn(rect));
+    HEngine::wait(30);
 }
 
-static void draw_border(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-DrawBorder", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::DrawBorder(obj));
-    hanim::HEngine::recorder_stop();
+static void shift() {
+    AutoRecordHelper _ar("Shift");
+
+    HEngine::play(Shift(rect));
+    HEngine::wait(30);
 }
 
-static void shift(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-Shift", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::Shift(obj));
-    hanim::HEngine::recorder_stop();
+static void move_to() {
+    AutoRecordHelper _ar("MoveTo");
+
+    auto target = Triangle().shift(HPos::RIGHT * 1.5);
+    rect.move_to(HPos::ORIGIN);
+
+    HEngine::add(target);
+    HEngine::play(MoveTo(rect, target.get_center()));
+
+    target.opacity(0);
+    HEngine::wait(30);
 }
 
-static void move_to_and_rotate(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-MoveTo-Rotate", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::HAnimGroup(
-        hanim::MoveTo(obj, {0, 0, 0}),
-        hanim::Rotate(obj, -90)
-    ));
-    hanim::HEngine::recorder_stop();
+static void rotate() {
+    AutoRecordHelper _ar("Rotate");
+    rect.move_to(HPos::ORIGIN);
+    HEngine::play(Rotate(rect, 90), 40);
+    HEngine::play(Rotate(rect, -90), 20);
+    HEngine::wait(30);
 }
 
-static void rotate(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-Rotate", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::Rotate(obj));
-    hanim::HEngine::recorder_stop();
+static void scale() {
+    AutoRecordHelper _ar("Scale");
+    rect.move_to(HPos::ORIGIN);
+    HEngine::play(Scale(rect, 2), 40);
+    HEngine::play(Scale(rect, 0.5), 20);
+    HEngine::wait(30);
 }
 
-static void scale(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-Scale", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::Scale(obj, 2), 30);
-    hanim::HEngine::play(hanim::Scale(obj, 0.5), 30);
-    hanim::HEngine::recorder_stop();
+static void color_update() {
+    AutoRecordHelper _ar("ColorUpdate");
+    HEngine::play(ColorUpdate(rect, HColor::BLUE, false, true));
+    HEngine::wait(30);
 }
 
-static void color_update(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-ColorUpdate", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::ColorUpdate(obj, {1, 1, 1, 1}, true, false), 30);
-    hanim::HEngine::play(hanim::ColorUpdate(obj, {1, 0, 0, 0.5}, false), 30);
-    hanim::HEngine::recorder_stop();
-}
-
-static void opacity_and_rotate(hanim::HObject &obj) {
-    hanim::HEngine::recorder_file_name(gObjName + std::to_string(gRunIndex++) +  "-Opacity-Rotate", true);
-    hanim::HEngine::recorder_start();
-    hanim::HEngine::play(hanim::HAnimGroup(
-        hanim::Opacity(obj, 0, true, false),
-        hanim::Rotate(obj, 90)
+static void opacity() {
+    AutoRecordHelper _ar("Opacity");
+    HEngine::play(Opacity(rect, 0, true, false), 30);
+    HEngine::play(HAnimGroup(
+        Opacity(rect, 0.5, true, false),
+        Opacity(rect, 0.5, false, true)
     ), 30);
-    hanim::HEngine::play(hanim::HAnimGroup(
-        hanim::Opacity(obj, 0),
-        hanim::Rotate(obj, 90)
-    ), 30);
-    hanim::HEngine::recorder_stop();
+    HEngine::wait(30);
 }
 
-static void anim_start(hanim::HObject &obj) {
-    hanim::HEngine::default_config1();
-    create(obj);
-    draw_border(obj);
-    shift(obj);
-    move_to_and_rotate(obj);
-    rotate(obj);
-    scale(obj);
-    color_update(obj);
-    opacity_and_rotate(obj);
+static void fade_out() {
+    AutoRecordHelper _ar("FadeOut");
+    HEngine::play(FadeOut(rect));
+    HEngine::wait(30);
 }
 
-static void anim_start(hanim::HObject &&obj) {
-    anim_start(obj);
+
+static void create() {
+    AutoRecordHelper _ar("Create");
+    rect.stroke_color(HColor::WHITE)
+        .fill_color(HColor::GREEN)
+        .fill_opacity(0.5);
+    HEngine::play(Create(rect));
+    HEngine::wait(30);
+}
+
+static void draw_border() {
+    AutoRecordHelper _ar("DrawBorder");
+    HEngine::play(DrawBorder(rect));
+    HEngine::wait(30);
+}
+
+static void transform() {
+    AutoRecordHelper _ar("Transform");
+    auto point = Point().shift(HPos::UP * 1.5);
+    auto line = Line().shift(HPos::LEFT * 1.5);
+    auto triangle = Triangle().shift(HPos::DOWN * 1.5);
+    auto rectCopy = rect.clone();
+    auto circle = Circle().shift(HPos::RIGHT * 1.5);
+    HEngine::play(Transform(rect, point));
+    HEngine::play(Transform(rect, line));
+    HEngine::play(Transform(rect, triangle));
+    HEngine::play(Transform(rect, circle));
+    HEngine::play(Transform(rect, rectCopy));
+    HEngine::wait(30);
+}
+
+static void anim_start() {
+    HEngine::default_config1();
+
+    // base
+    fade_in();
+    shift();
+    move_to();
+    rotate();
+    scale();
+    color_update();
+    opacity();
+    fade_out();
+
+    // create
+    create();
+    draw_border();
+    transform();
 }
 
 int main() {
-    gObjName = "PixelPanel"; anim_start(hanim::PixelPanel());
+    anim_start();
     return 0;
 }

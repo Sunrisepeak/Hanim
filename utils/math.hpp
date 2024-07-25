@@ -1,15 +1,15 @@
 #ifndef MATH_HPP_HANIM
 #define MATH_HPP_HANIM
 
+#include <vector>
+
 #include <third-party/third_party.hanim.h>
 
 using vec3 = glm::vec3;
 using vec4 = glm::vec4;
 using mat4 = glm::mat4;
 
-using Point = vec3;
 using Color = vec4;
-using Points = std::vector<Point>;
 using Colors = std::vector<Color>; 
 
 bool safe_divide(glm::vec3& vec, float divisor) {
@@ -20,6 +20,11 @@ bool safe_divide(glm::vec3& vec, float divisor) {
         vec = vec / divisor;
         return true;
     }
+}
+
+static inline vec3 operator*(const vec3 &v3, float value) {
+    float val = value;
+    return val * v3;
 }
 
 /*

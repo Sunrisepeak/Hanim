@@ -48,7 +48,7 @@ int main() {
     bool isDrawing = false;
     auto myScene = MyScene();
     bool playAnim = false;
-    int targetframeNumber = 0;
+    int target_frame_number = 0;
 
     // config window render - imgui
     hanim::HEngine::set_render_handler(
@@ -84,7 +84,7 @@ int main() {
             ImGui::Begin("Hanim Control");
             {
                 ImGui::Checkbox("Play Animation", &playAnim);
-                ImGui::SliderInt("Target Frame", &targetframeNumber, 0, myScene.get_frame_number());
+                ImGui::SliderInt("Target Frame", &target_frame_number, 0, myScene.get_frame_number());
             }
             ImGui::End();
 
@@ -99,7 +99,7 @@ int main() {
         if (playAnim) {
             HEngine::render(myScene);
         } else {
-            HEngine::render(myScene, targetframeNumber);
+            HEngine::render(myScene, target_frame_number);
         } 
     }
 
