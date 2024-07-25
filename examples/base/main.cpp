@@ -42,8 +42,9 @@ static void move_to() {
     HEngine::add(target);
     HEngine::play(MoveTo(rect, target.get_center()));
 
-    target.opacity(0);
     HEngine::wait(30);
+
+    target.opacity(0);
 }
 
 static void rotate() {
