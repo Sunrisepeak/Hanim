@@ -79,4 +79,12 @@ Hi Animation | Hello Animation | 一个开发中的动画引擎...
   </tr>
 </table>
 
+## 动画视频
+
+### HelloPixel
+
 https://github.com/user-attachments/assets/4a4d9aa0-8e95-4018-a899-1dfc7a0e0ba4
+
+### [D2Learn Logo](https://github.com/d2learn)
+
+https://github.com/user-attachments/assets/03999462-5902-4e03-82e8-47289cabbe4b
